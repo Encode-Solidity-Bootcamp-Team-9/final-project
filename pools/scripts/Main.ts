@@ -78,11 +78,10 @@ async function callContractFunction (contract: ethers.Contract , args: any) {
             await confirmTx('mint', contract, args.call.params);
             tx = await contract.mint(to, amount);
             break;
-        case 'publicStateVar':
-            //tx = await contract.winnerName();
-            tx = 'hi';
-            const name = ethers.utils.parseBytes32String(tx)
-            console.log("winnerName: " + name);
+        case 'totalSupply':
+            tx = await contract.totalSupply();
+            const supply = tx.toString();
+            console.log("Total supply: " + supply);
             return;
         default:
             console.log("FUNCTION DOES NOT EXIST");
