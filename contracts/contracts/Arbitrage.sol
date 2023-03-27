@@ -61,13 +61,13 @@ contract Arbitrage is Ownable {
 
     /// @notice Gives tokens based on the amount of ETH sent
     /// @dev This implementation is prone to rounding problems - could replace with price instead of ratio
-    /// @dev When implementing, need to call approve() to enable contract.address to mint tokens for users
     function purchaseTokens() external payable whenArbitrageTokenSet {
         arbitrageToken.mint(msg.sender, msg.value * purchaseRatio);
     }
 
     /// @notice Burns tokens and gives half the equivalent ETH back to user
     /// @param amount Amount of tokens to be returned
+    /// @dev When implementing, need to call approve() to enable contract.address to burn tokens for users
     function returnTokens(uint256 amount) external whenArbitrageTokenSet {
         arbitrageToken.burnFrom(msg.sender, amount);
         payable(msg.sender).transfer(amount / (purchaseRatio / 2));
