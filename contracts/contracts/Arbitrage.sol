@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >= 0.7.0 <0.9.0;
+pragma solidity >=0.7.0 <0.9.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {ArbitrageToken} from "./Token.sol";
@@ -35,6 +35,7 @@ contract Arbitrage is Ownable {
         uint256 amount;
         uint256 claimed;
     }
+    
     /// @notice Mapping of address to stake info
     mapping(address => StakeInfo) public stakeInfos;
     /// @notice Mapping of address to staking status
