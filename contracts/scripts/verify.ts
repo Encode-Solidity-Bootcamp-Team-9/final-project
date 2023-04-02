@@ -1,16 +1,32 @@
+import * as readline from "node:readline/promises";
+import { stdin as input, stdout as output } from "node:process";
 import { run } from "hardhat";
+
+const rl = readline.createInterface({input, output});
 
 async function main() {
     
-    console.log("Verifying the contract on Etherscan...");
-    await run("verify:verify", {
-        address: "0x867FA6bc66EA36065B0C04a0eD49E1978f3Fd48d",
-        constructorArguments: [
-            10000,
-            300000,
-            2
-        ],
-    });
+    const answer = await rl.question("Select contract to verify: \n Options: \n [0]: Exit \n [1]: FakeETH token \n [2]: Stable token \n");
+    
+    console.log(`Verifying contract on Etherscan...`);
+   
+    switch (answer) {
+        case '0':
+            rl.close();
+            return;
+        case '1':
+            await run("verify:verify", {
+                address: "0x7d5D9602eDc1cA865FD38B5CcAfF7d464C4168A1",
+                constructorArguments: ["FakeETH", "ETH"],
+            });
+            break;
+        case '2':
+            await run("verify:verify", {
+                address: "0xab2Be03f150278aa83BcA0b73aA8Ac882aAd2851",
+                constructorArguments: ["Stable", "STBL"],
+            });
+            break;
+    }
 }
 
 main().catch((error) => {
