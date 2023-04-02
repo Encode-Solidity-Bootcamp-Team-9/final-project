@@ -7,7 +7,6 @@ import { run } from "hardhat"
 
 // For macOS users
 import path from "path";
-import { hardhatArguments } from "hardhat";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 let contract: Arbitrage;
