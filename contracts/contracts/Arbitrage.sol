@@ -8,17 +8,27 @@ interface IFaucetToken {
     function mint(address to, uint256 amount) external;
 }
 
+interface IStakedToken {
+    //add balanceOf method
+}
+
 contract Arbitrage is Ownable {
     
-    /// @notice Contract of faucet token
+    /// @notice Contract of faucet token (token 0)
     IFaucetToken public faucetToken;
     /// @notice Amount of faucet tokens distributed when claimed
     uint256 public faucetAmount;
     /// @notice Amount of time required between two claims
     uint256 public faucetLockTime;
 
+    /// @notice Contract of staked token (token 1)
+    IStakedToken public stakedToken;
     /// @notice Minimum amount of time tokens are staked for
     uint256 public stakeLockTime;
+    /// @notice Total amount staked
+    uint256 public totalStaked;
+    /// @notice Total profits
+    uint256 public totalProfits;
 
     /// @notice Declares staking event with address and amount
     event Staked(address indexed _from, uint256 amount);
@@ -48,11 +58,13 @@ contract Arbitrage is Ownable {
         address _faucetToken,
         uint256 _faucetAmount,
         uint256 _faucetLockTime,
+        address _stakedToken,
         uint256 _stakeLockTime
     ) {
         faucetToken = IFaucetToken(_faucetToken);
         faucetAmount = _faucetAmount;
         faucetLockTime = _faucetLockTime;
+        stakedToken = IStakedToken(_stakedToken);
         stakeLockTime = _stakeLockTime;
     }
 
@@ -70,37 +82,57 @@ contract Arbitrage is Ownable {
     function stakeToken(uint256 amount) external {
         require(amount > 0, "Stake amount should be more than zero");
         require(addressInStake[msg.sender] == false, "You have already staked tokens");
-        require(arbitrageToken.balanceOf(msg.sender) >= amount, "Insufficient balance");
+        require(stakedToken.balanceOf(msg.sender) >= amount, "Insufficient balance");
        
-        arbitrageToken.transferFrom(msg.sender, address(this), amount);
+        stakedToken.transferFrom(msg.sender, address(this), amount);
+
+        totalStaked += amount;
         
         addressInStake[msg.sender] == true;
-        
+
         stakeInfos[msg.sender] = StakeInfo({
             startTS: block.timestamp,
-            endTS: block.timestamp + stakeDuration,
+            endTS: block.timestamp + stakeLockTime,
             amount: amount,
-            claimed: 0
+            profit: 0,
+            claimed: 0,
+            withdrawn: 0
         });
 
         emit Staked(msg.sender, amount);
     }
 
-    /// @notice Returns staked tokens + interest after staking duration has been reached
-    /// @dev Fixed interest and duration, could be replaced with variable interest and duration
-    function claimStakingReward() external {
+    /// @notice Withdraws stake
+    function withdrawStake(uint amount) external {
         require(addressInStake[msg.sender] == true, "You don't have any staked tokens.");
-        require(stakeInfos[msg.sender].endTS < block.timestamp, "You cannot yet withdraw your staked tokens.");
+        require(block.timestamp > stakeInfos[msg.sender].endTS, "You cannot yet withdraw your staked tokens.");
+        require(amount <= stakeInfos[msg.sender].amount, "You are trying to withdraw more than you have staked.");
 
-        uint256 stakeAmount = stakeInfos[msg.sender].amount;
-        uint256 totalReward = stakeAmount + stakeAmount * interestRate / 100;
+        stakedToken.transfer(msg.sender, amount);
+        stakeInfos[msg.sender].withdrawn += amount;
+        totalStaked -= amount;
+        //if 0 remove address in stake
+        //emit withdraw event
+    }
 
-        
-        arbitrageToken.transfer(msg.sender, totalReward);
-        stakeInfos[msg.sender].claimed = totalReward;
-        addressInStake[msg.sender] = false;
+    /// @notice Performs arbitrage
+    function performArbitrage() external {
+        //Take percentage or all of totalStaked (??)
+        //Buy faucet tokens with staked tokens where highest gain
+        //Sell faucet token for staked tokens from second pool
+        //Record the profits as profits = totalReturned - amountStaked
+        //Add to the profits - anyway to avoid a loop here?
+    }
 
-        emit Claimed(msg.sender, totalReward);
+    /// @notice Claim profits
+    function claimArbitrageProfits() external {
+        uint profit = stakeInfos[msg.sender].profit;
+        require(profit > 0, "You don't have any profits to claim.");
+ 
+        stakedToken.transfer(msg.sender, profit);
+        stakeInfos[msg.sender].claimed -= profit;
+
+        emit Claimed(msg.sender, profit);
     }
 
 }
