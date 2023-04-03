@@ -2,6 +2,10 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+import '@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol';
+import '@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol';
+
 import {ArbitrageToken} from "./Token.sol";
 
 interface IFaucetToken {
@@ -9,7 +13,9 @@ interface IFaucetToken {
 }
 
 interface IStakedToken {
-    //add balanceOf method
+    function balanceOf(address addr) external returns (uint256);
+    function transferFrom(address from, address to, uint256 amount) external;
+    function transfer(address to, uint256 amount) external;
 }
 
 contract Arbitrage is Ownable {
@@ -54,18 +60,29 @@ contract Arbitrage is Ownable {
     /// @notice Mapping of address to staking status
     mapping(address => bool) public addressInStake;
 
+    /// @notice Enum which represent exchanges
+    enum Dex { UNISWAP, SUSHISWAP }
+    /// @notice Interface for interacting with Sushiswap
+    IUniswapV2Router02 public immutable sushiRouter;
+    /// @notice Interface for interacting with Uniswap
+    ISwapRouter public immutable uniRouter;
+
     constructor(
         address _faucetToken,
         uint256 _faucetAmount,
         uint256 _faucetLockTime,
         address _stakedToken,
-        uint256 _stakeLockTime
+        uint256 _stakeLockTime,
+        address _sushiRouter,
+        address _uniRouter
     ) {
         faucetToken = IFaucetToken(_faucetToken);
         faucetAmount = _faucetAmount;
         faucetLockTime = _faucetLockTime;
         stakedToken = IStakedToken(_stakedToken);
         stakeLockTime = _stakeLockTime;
+        sushiRouter = IUniswapV2Router02(_sushiRouter);
+        uniRouter = ISwapRouter(_uniRouter);
     }
 
     /// @notice Mints and transfers faucet tokens to caller, and resets time lock
@@ -116,7 +133,7 @@ contract Arbitrage is Ownable {
     }
 
     /// @notice Performs arbitrage
-    function performArbitrage() external {
+    function performArbitrage(Dex _sellAt, address _tokenToSell, address _tokenToBuy, uint256 _amount) external {
         //Take percentage or all of totalStaked (??)
         //Buy faucet tokens with staked tokens where highest gain
         //Sell faucet token for staked tokens from second pool
