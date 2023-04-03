@@ -18,7 +18,7 @@ contract Arbitrage is Ownable {
     uint256 public faucetLockTime;
 
     /// @notice Minimum amount of time tokens are staked for
-    uint256 public stakeDuration;
+    uint256 public stakeLockTime;
 
     /// @notice Declares staking event with address and amount
     event Staked(address indexed _from, uint256 amount);
@@ -60,7 +60,7 @@ contract Arbitrage is Ownable {
     /// @dev Requires giving contract "MINTER_ROLE" after deployment
     function requestTokens() external {
         require(block.timestamp > lockTime[msg.sender], "Faucet lock time has not expired. Please try again later.");
-        tokenContract.mint(msg.sender, faucetAmount);
+        faucetToken.mint(msg.sender, faucetAmount);
         lockTime[msg.sender] = block.timestamp + faucetLockTime;
     }
 
