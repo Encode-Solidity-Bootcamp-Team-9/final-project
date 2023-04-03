@@ -4,12 +4,24 @@ import "@nomicfoundation/hardhat-toolbox";
 const config: HardhatUserConfig = {
   paths: { tests: "tests" },
   solidity: {
-    version: "0.8.17",
-    settings: {
-      optimizer: {
-        enabled: false,
-        runs: 0,
+    compilers: [
+      {
+        version: "0.5.0",
       },
+      {
+        version: "0.8.17",
+        settings: {
+          optimizer: {
+            enabled: false,
+            runs: 0,
+          },
+        }
+      },
+    ],
+    overrides: {
+      "contracts/UniswapV2Router02.sol": {
+        version: "0.6.12",
+      }
     }
   },
   networks: {
