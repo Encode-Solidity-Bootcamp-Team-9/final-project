@@ -4,80 +4,70 @@ pragma solidity >=0.7.0 <0.9.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {ArbitrageToken} from "./Token.sol";
 
-contract Arbitrage is Ownable {
+interface IFaucetToken {
+    function mint(address to, uint256 amount) external;
+}
 
-    /// @notice Address of the native token used in arbitrage app
-    ArbitrageToken public arbitrageToken;
-    /// @notice Amount of tokens given per ETH paid
-    uint256 public purchaseRatio;
+contract Arbitrage is Ownable {
     
+    /// @notice Contract of faucet token
+    IFaucetToken public faucetToken;
+    /// @notice Amount of faucet tokens distributed when claimed
+    uint256 public faucetAmount;
+    /// @notice Amount of time required between two claims
+    uint256 public faucetLockTime;
+
     /// @notice Minimum amount of time tokens are staked for
     uint256 public stakeDuration;
-    /// @notice Staking interest rate
-    uint256 public interestRate;
 
     /// @notice Declares staking event with address and amount
     event Staked(address indexed _from, uint256 amount);
-    /// @notice Declares event when staking reward is claimed
+    /// @notice Declares event when staking profit is claimed
     event Claimed(address indexed _from, uint256 amount);
-
-
-    /// @notice Passes when payment token contract is set
-    modifier whenArbitrageTokenSet() {
-        require (arbitrageToken != ArbitrageToken(address(0)), "Token not set");
-        _;
-    }
+    /// @notice Declares event when stake is withdrawn
+    event Withdrawn(address indexed _from, uint256 amount);
 
     /// @notice Struct that defines stake information
     struct StakeInfo {
         uint256 startTS;
         uint256 endTS;
         uint256 amount;
+        uint256 profit;
         uint256 claimed;
+        uint256 withdrawn;
     }
     
+    /// @notice Mapping of address and faucet lock time
+    mapping(address => uint) public lockTime;
     /// @notice Mapping of address to stake info
     mapping(address => StakeInfo) public stakeInfos;
     /// @notice Mapping of address to staking status
     mapping(address => bool) public addressInStake;
 
     constructor(
-        uint256 _purchaseRatio,
-        uint256 _stakeDuration,
-        uint256 _interestRate
+        address _faucetToken,
+        uint256 _faucetAmount,
+        uint256 _faucetLockTime,
+        uint256 _stakeLockTime
     ) {
-        purchaseRatio = _purchaseRatio;
-        stakeDuration = _stakeDuration;
-        interestRate = _interestRate;
+        faucetToken = IFaucetToken(_faucetToken);
+        faucetAmount = _faucetAmount;
+        faucetLockTime = _faucetLockTime;
+        stakeLockTime = _stakeLockTime;
     }
 
-    /// @notice Function which deploys the ArbitrageToken smart contract
-    /// @param tokenName Name of the token used for payment
-    /// @param tokenSymbol Symbok of the token used for payment
-    /// @dev could set up new access role to not limit to owner
-    function createArbitrageToken(string memory tokenName, string memory tokenSymbol) public onlyOwner {
-        require(arbitrageToken == ArbitrageToken(address(0)), "Token already set");
-        arbitrageToken = new ArbitrageToken(tokenName, tokenSymbol);
+    /// @notice Mints and transfers faucet tokens to caller, and resets time lock
+    /// @dev Requires giving contract "MINTER_ROLE" after deployment
+    function requestTokens() external {
+        require(block.timestamp > lockTime[msg.sender], "Faucet lock time has not expired. Please try again later.");
+        tokenContract.mint(msg.sender, faucetAmount);
+        lockTime[msg.sender] = block.timestamp + faucetLockTime;
     }
 
-    /// @notice Gives tokens based on the amount of ETH sent
-    /// @dev This implementation is prone to rounding problems - could replace with price instead of ratio
-    function purchaseTokens() external payable whenArbitrageTokenSet {
-        arbitrageToken.mint(msg.sender, msg.value * purchaseRatio);
-    }
-
-    /// @notice Burns tokens and gives half the equivalent ETH back to user
-    /// @param amount Amount of tokens to be returned
-    /// @dev When implementing, need to call approve() to enable contract.address to burn tokens for users
-    function returnTokens(uint256 amount) external whenArbitrageTokenSet {
-        arbitrageToken.burnFrom(msg.sender, amount);
-        payable(msg.sender).transfer(amount / (purchaseRatio / 2));
-    }
-
-    /// @notice Transfers staked amount to contract, stores detailes and emits event
+    /// @notice Transfers staked amount to contract, stores details and emits event
     /// @dev Allows users to stake once only (could replace with maximum value).
     /// @param amount Amount of tokens to be staked.
-    function stakeToken(uint256 amount) external whenArbitrageTokenSet {
+    function stakeToken(uint256 amount) external {
         require(amount > 0, "Stake amount should be more than zero");
         require(addressInStake[msg.sender] == false, "You have already staked tokens");
         require(arbitrageToken.balanceOf(msg.sender) >= amount, "Insufficient balance");
@@ -98,7 +88,7 @@ contract Arbitrage is Ownable {
 
     /// @notice Returns staked tokens + interest after staking duration has been reached
     /// @dev Fixed interest and duration, could be replaced with variable interest and duration
-    function claimStakingReward() external whenArbitrageTokenSet {
+    function claimStakingReward() external {
         require(addressInStake[msg.sender] == true, "You don't have any staked tokens.");
         require(stakeInfos[msg.sender].endTS < block.timestamp, "You cannot yet withdraw your staked tokens.");
 
