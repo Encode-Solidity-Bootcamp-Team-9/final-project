@@ -423,3 +423,5 @@ typechain-types
 cache
 artifacts
 /final-project.iml
+
+*config.ts
