@@ -9,7 +9,7 @@ import Stable from '../artifacts/contracts/Stable.sol/Stable.json';
 
 // For macOS users
 import path from "path";
-import { keccak256 } from "ethers/lib/utils";
+import { keccak256, toUtf8Bytes } from "ethers/lib/utils";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 let signer: Wallet;
@@ -34,7 +34,7 @@ async function main() {
     stblContract = new ethers.Contract(
         STBL_ADDRESS,
         Stable.abi,
-            signer
+        signer
     );
 
     const answer = await rl.question("Actions: \n Options: \n [1]: Mint FakeETH token \n [2]: Mint Stable token \n [3]: Get token balance \n [4]: Give minter role for both tokens \n [5]: Check minter role \n");
@@ -61,16 +61,16 @@ async function main() {
         case '4':
             const grantee = await rl.question("Account address: ");
             await confirmTx(`Grant ${grantee} minter role for FETH and STBL`);
-            const grantFethMinter = await fethContract.grantRole(ethers.utils.formatBytes32String("MINTER_ROLE"), grantee);
-            const grantStblMinter = await stblContract.grantRole(ethers.utils.formatBytes32String("MINTER_ROLE"), grantee);
+            const grantFethMinter = await fethContract.grantRole(keccak256(toUtf8Bytes("MINTER_ROLE")), grantee);
+            const grantStblMinter = await stblContract.grantRole(keccak256(toUtf8Bytes("MINTER_ROLE")), grantee);
             await grantFethMinter.wait();
             await grantStblMinter.wait();
             console.log(`Minter role granted.`);
             break;
         case '5':
             const account = await rl.question("Account address: ");
-            const fethMinter = await fethContract.hasRole(ethers.utils.formatBytes32String('MINTER_ROLE'), account);
-            const stblMinter = await stblContract.hasRole(ethers.utils.formatBytes32String('MINTER_ROLE'), account);
+            const fethMinter = await fethContract.hasRole(keccak256(toUtf8Bytes("MINTER_ROLE")), account);
+            const stblMinter = await stblContract.hasRole(keccak256(toUtf8Bytes("MINTER_ROLE")), account);
             console.log(`Account ${account} has minter role for:\nFETH: ${fethMinter}\nSTBL: ${stblMinter}`);
             break;
         }
