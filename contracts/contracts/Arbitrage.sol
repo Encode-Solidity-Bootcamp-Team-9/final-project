@@ -13,8 +13,8 @@ interface IFaucetToken {
 }
 
 interface IStakedToken {
-    function balanceOf(address to) external returns (uint256);
-    function transferFrom(address to, address asd, uint256 amount) external;
+    function balanceOf(address addr) external returns (uint256);
+    function transferFrom(address from, address to, uint256 amount) external;
     function transfer(address to, uint256 amount) external;
 }
 
