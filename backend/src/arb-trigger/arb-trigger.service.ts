@@ -6,13 +6,22 @@ import * as IUniswapV3Factory
 import * as IUniswapV3Pool from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json'
 import * as ISushiswapV2Factory from "@uniswap/v2-core/build/IUniswapV2Factory.json"
 import * as ISushiswapV2Pair from "@uniswap/v2-core/build/IUniswapV2Pair.json"
+import * as IERC20 from "@uniswap/v2-core/build/IERC20.json"
 
-
-import {BigNumber, Contract, ethers} from "ethers";
+import {Contract, ethers} from "ethers";
 import {computePoolAddress} from "@uniswap/v3-sdk";
-import {Dex, SUSHISWAP_FACTORY_ADDRESS, TOKEN_PAIR, UNISWAP_FACTORY_ADDRESS, UNISWAP_POOL_FEE_TIER} from "./config";
+import {
+  ARBITRAGE_CONTRACT_ADDRESS,
+  Dex,
+  SUSHISWAP_FACTORY_ADDRESS,
+  TOKEN_LOAN,
+  TOKEN_PAIR,
+  TOKEN_STAKING,
+  UNISWAP_FACTORY_ADDRESS,
+  UNISWAP_POOL_FEE_TIER
+} from "./config";
 import {JSBI} from "@uniswap/sdk";
-import e from "express";
+import {Token} from "@uniswap/sdk-core";
 
 @Injectable()
 export class ArbTriggerService {
@@ -23,12 +32,20 @@ export class ArbTriggerService {
   private sushiPool: Contract;
   private sushiFactory: Contract;
 
+  private stakeToken: Contract;
+
   private arbitrageInProgress: boolean = false;
 
   constructor(
     private readonly configService: ConfigService,
     private readonly chainProviderService: ChainProviderService,
   ) {
+
+    this.stakeToken = new ethers.Contract(
+      TOKEN_STAKING.address,
+      IERC20.abi,
+      this.chainProviderService.getProvider(),
+    );
 
     this.uniFactory = new ethers.Contract(
       UNISWAP_FACTORY_ADDRESS,
@@ -82,7 +99,7 @@ export class ArbTriggerService {
     });
   }
 
-  public async arbitrage(dexThatChanged: Dex) {
+  public async arbitrage(dexThatChanged) {
     if (this.arbitrageInProgress) {
       return;
     }
@@ -90,7 +107,7 @@ export class ArbTriggerService {
     try {
       this.arbitrageInProgress = true;
 
-      console.log("Arbitrage triggered because of swap on " + Dex[dexThatChanged] + "\n");
+      console.log("Arbitrage triggered because of swap on " + dexThatChanged + "\n");
       console.log("Checking prices...")
       const {uniPoolRatio, sushiPoolRatio} = await this.checkPrices();
 
@@ -133,6 +150,7 @@ export class ArbTriggerService {
       console.error(e);
     } finally {
       this.arbitrageInProgress = false;
+      console.log("\n##############################\n")
     }
   }
 
@@ -196,16 +214,33 @@ export class ArbTriggerService {
   }
 
   private async chooseStrategy(uniVsSushiDiffPercentage: number): Promise<Strategy> {
+
+    let sellDex, buyDex;
+
+    if (uniVsSushiDiffPercentage > 0) { //if percentage is positive, price on UNISWAP is higher - we sell there
+      sellDex = Dex.UNISWAP;
+      buyDex = Dex.SUSHISWAP
+
+    } else {
+      sellDex = Dex.SUSHISWAP;
+      buyDex = Dex.UNISWAP
+    }
+
     const strategy = {
-      buyToken: TOKEN_PAIR[0].symbol,
-      sellToken: TOKEN_PAIR[1].symbol,
-      buyDex: Dex[Dex.UNISWAP],
-      sellDex: Dex[Dex.SUSHISWAP],
-      buyAmount: "200",
-      sellAmount: "200",
+      buyToken: TOKEN_LOAN,
+      sellToken: TOKEN_STAKING,
+      buyDex: buyDex, //here we have to buy TOKEN_STAKING for TOKEN_LOAN
+      sellDex: sellDex, //here we have to sell TOKEN_STAKING for TOKEN_LOAN
+      amount: await this.stakeToken.balanceOf(ARBITRAGE_CONTRACT_ADDRESS)
     };
 
-    console.table(strategy);
+    console.table({
+      "Sell token": strategy.sellToken.symbol,
+      "Sell at Dex": strategy.sellDex,
+      "Sell amount": ethers.utils.formatUnits(strategy.amount, 'ether'),
+      "Buy token": strategy.buyToken.symbol,
+      "Rebuy at Dex": strategy.buyDex,
+    });
     return strategy;
   }
 
@@ -243,12 +278,11 @@ interface PriceRatio {
 }
 
 interface Strategy {
-  buyToken: string,
-  sellToken: string,
+  buyToken: Token,
+  sellToken: Token,
   buyDex: string,
   sellDex: string,
-  buyAmount: string,
-  sellAmount: string,
+  amount: string
 }
 
 interface Execution {
