@@ -287,9 +287,9 @@ export class ArbTriggerService {
     // totalStaked: await this.arbitrageContract.totalStaked(), todo: when arbitrage contract is ready
     let totalStaked : BigNumber = await this.stakeToken.balanceOf(ARBITRAGE_CONTRACT_ADDRESS);
 
-    //max sell amount is limited by total liquidity in the selling pool and adjusted by the difference between pools
+    //max sell amount is limited by total liquidity in the selling pool and divided by 10
     let maxSellAmountStr = ethers.utils.formatUnits(totalStaked.gt(liquidity) ? liquidity : totalStaked, TOKEN_STAKING.decimals);
-    let maxSellAmount = parseFloat(maxSellAmountStr) / Math.abs(uniVsSushiDiffPercentage);
+    let maxSellAmount = parseFloat(maxSellAmountStr) / Math.abs(10);
 
 
     const strategy = {
@@ -320,7 +320,7 @@ export class ArbTriggerService {
   private async calculateProfitability(strategy: Strategy): Promise<Profitability> {
 
     const maxAmount = parseFloat(ethers.utils.formatUnits(strategy.maxSellAmount, strategy.sellToken.decimals));
-    const steps = 5;
+    const steps = 10;
     const step = maxAmount / steps;
 
     let mostProfit: BigNumber = null;
@@ -346,9 +346,12 @@ export class ArbTriggerService {
 
       // console.log("Profit: " + ethers.utils.formatUnits(profit, TOKEN_STAKING.decimals) + " " + TOKEN_STAKING.symbol);
 
+      console.log(i + ": Profit " + ethers.utils.formatUnits(profit, strategy.sellToken.decimals) + " " + strategy.sellToken.symbol + " (Trade amount: "+ amount + ")" );
       if (mostProfit == null || profit.gt(mostProfit)) {
         mostProfit = profit;
         amountWithMostProfit = amount;
+      } else {
+        break;
       }
     }
 

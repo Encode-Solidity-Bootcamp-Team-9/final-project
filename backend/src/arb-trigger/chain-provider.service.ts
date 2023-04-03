@@ -1,7 +1,6 @@
 import {Injectable} from '@nestjs/common';
 import {ConfigService} from '@nestjs/config';
 import {ethers, Signer} from 'ethers';
-import {SupportedChainId} from "@uniswap/sdk-core/dist/constants";
 import {CHAIN_ID} from "./config";
 
 
