@@ -1,6 +1,6 @@
 import { Token } from '@uniswap/sdk-core'
 import { FeeAmount } from '@uniswap/v3-sdk'
-import { ABC_TOKEN, WETH } from './constants'
+import { FETH, ABC } from './constants'
 
 // Sets if the example should run locally or on chain
 export enum Environment {
@@ -34,8 +34,8 @@ export interface ExampleConfig {
 export const CurrentConfig: ExampleConfig = {
   env: Environment.MAINNET,
   rpc: {
-    local: 'https://goerli.infura.io/v3/ca4f3f2c038648f9b7a3e0e8f563679c',
-    mainnet: 'https://goerli.infura.io/v3/ca4f3f2c038648f9b7a3e0e8f563679c',
+    local: 'https://polygon-mumbai.g.alchemy.com/v2/cUPcNv4p61xgbX-_oLMTprrni2Z9wZPj',
+    mainnet: 'https://polygon-mumbai.g.alchemy.com/v2/cUPcNv4p61xgbX-_oLMTprrni2Z9wZPj',
   },
   wallet: {
     address: '0x90AA731eea0C9CbB2299b2ceb6674c5f54dFEBB0',
@@ -43,10 +43,10 @@ export const CurrentConfig: ExampleConfig = {
       '0x39bfebe1a0a6dcb4502ae085d9bcc8c7c75b6467255f82343ef51f10adb89442',
   },
   tokens: {
-    token0: ABC_TOKEN,
-    token0Amount: 50,
-    token1: WETH,
-    token1Amount: 0.01,
-    poolFee: FeeAmount.MEDIUM,
+    token0: FETH,
+    token0Amount: 1,
+    token1: ABC,
+    token1Amount: 1500,
+    poolFee: FeeAmount.LOWEST,
   },
 }

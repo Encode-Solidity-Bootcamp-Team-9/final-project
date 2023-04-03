@@ -48,6 +48,7 @@ export async function mintPosition(): Promise<TransactionState> {
   const address = getWalletAddress()
   const provider = getProvider()
   const signer = getSigner()
+
   if (!address || !provider) {
     return TransactionState.Failed
   }
@@ -68,7 +69,7 @@ export async function mintPosition(): Promise<TransactionState> {
     return TransactionState.Failed
   } */
 
-/*   console.log("Creating pool...");
+  console.log("Creating pool...");
   const factoryV3 = new ethers.Contract(
     POOL_FACTORY_CONTRACT_ADDRESS,
     FACTORY_V3_ABI,
@@ -82,32 +83,17 @@ export async function mintPosition(): Promise<TransactionState> {
   )
 
   const txReceipt = await tx.wait();
-  console.log('Tx hash: ' + txReceipt.transactionHash); */
+  console.log('Pool created: ' + txReceipt.transactionHash);
 
-  // Then we need to initialize the pool
-  console.log("initializing the pool...");
+  // INITIALIZE THE POOL WITH A STARTING PRICE
+  console.log("Initializing the pool...");
 
-  // IF YOU FIND A WAY TO DO SQUARE ROOTS - TELL ME. I give up
-
-/*   const a = JSBI.BigInt(Math.floor(CurrentConfig.tokens.token0Amount * 10**18));
-  const b = JSBI.BigInt(Math.floor(CurrentConfig.tokens.token1Amount * 10**18));
-  const c = JSBI.divide(a, b);
-  const exp96 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(96));
-  const d = JSBI.multiply(c, exp96);
-
-  console.log(a.toString());
-  console.log(b.toString());
-  console.log("C...");
-  console.log(c.toString());
-  console.log(exp96.toString());
-  console.log(d.toString());
-
-  const e = new Big(JSBI.toNumber(d));
-  console.log(e);
-  const sqrtPriceX96 = JSBI.BigInt(e.sqrt().toFixed());
-  console.log(sqrtPriceX96.toString()); */
-
-/*   const sqrtPriceX96 = JSBI.BigInt('396140812571321687967719751680000').toString();
+  // First we calculate the starting price as a Q64.96 number
+  const token0Amount = CurrentConfig.tokens.token1Amount;
+  const token1Amount = CurrentConfig.tokens.token0Amount;
+  const priceRatio = token0Amount / token1Amount;
+  const sqrtPrice = Math.sqrt(priceRatio);
+  const sqrtPriceX96 = JSBI.BigInt(sqrtPrice * 2**96).toString();
 
   // Setting up pool contract
   const poolAddress = computePoolAddress({
@@ -122,12 +108,14 @@ export async function mintPosition(): Promise<TransactionState> {
     IUniswapV3PoolABI.abi,
     signer
   )
-  
+
+  // Send the initializing transaction
   const initializeTx = await poolContract.initialize(sqrtPriceX96);
   const initializeTxReceipt = await initializeTx.wait();
-  console.log(initializeTxReceipt.transactionHash); */
+  console.log('Pool initialized: ' + initializeTxReceipt.transactionHash);
   
-
+  // MINTING THE POSITION
+  // Creating the position for the first time and adding liquidity
   console.log("positionToMint...");
   const positionToMint = await constructPosition(
     CurrencyAmount.fromRawAmount(

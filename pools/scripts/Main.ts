@@ -35,12 +35,13 @@ function parseArguments () {
         }
     };
 
+    console.log(argsStruct);
     return argsStruct;
 }
 
 function setProvider (): ethers.providers.AlchemyProvider {
     const provider = new ethers.providers.AlchemyProvider(
-        "goerli",
+        "maticmum",
         process.env.ALCHEMY_API_KEY
     );
     return provider;

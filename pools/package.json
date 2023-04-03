@@ -29,6 +29,7 @@
     "@openzeppelin/contracts": "^4.8.2",
     "@uniswap/sdk-core": "^3.2.2",
     "@uniswap/v3-sdk": "^3.9.0",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.0.3",
+    "web3": "^1.9.0"
   }
 }

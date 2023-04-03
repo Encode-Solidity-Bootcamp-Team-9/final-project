@@ -5,12 +5,12 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 
-contract ABC is ERC20, ERC20Burnable, AccessControl {
+contract FETH is ERC20, ERC20Burnable, AccessControl {
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
 
-    constructor() ERC20("ABC", "ABC") {
+    constructor() ERC20("Fake ETH", "FETH") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
     }

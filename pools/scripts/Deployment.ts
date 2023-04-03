@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { argv } from "node:process";
 import * as dotenv from "dotenv";
-import { ABC__factory } from "../typechain-types";
+import { STBL__factory, FETH__factory } from "../typechain-types";
 
 // For macOS users
 import path from "path";
@@ -14,7 +14,7 @@ async function main() {
 
     // Setting provider
     const provider = new ethers.providers.AlchemyProvider(
-        "goerli",
+        "maticmum",
         process.env.ALCHEMY_API_KEY
     );
 
@@ -38,7 +38,7 @@ async function main() {
     console.log("Deploying Token contract");
 
     // Get contract factory
-    const fact = new ABC__factory(signer);
+    const fact = new FETH__factory(signer);
 
     // Deploying
     const contract = await fact.deploy();

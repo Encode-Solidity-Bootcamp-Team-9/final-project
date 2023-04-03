@@ -46,9 +46,9 @@ export async function sendTransaction(
 
 function createWallet(): ethers.Wallet {
   // Setting provider
-  let provider = new ethers.providers.InfuraProvider(
-    "goerli",
-    process.env.INFURA_API_KEY
+  let provider = new ethers.providers.AlchemyProvider(
+    "maticmum",
+    process.env.ALCHEMY_API_KEY
   );
 
   return new ethers.Wallet(CurrentConfig.wallet.privateKey, provider)

@@ -11,20 +11,20 @@ export const NONFUNGIBLE_POSITION_MANAGER_CONTRACT_ADDRESS =
 
 // Currencies and Tokens
 
-export const ABC_TOKEN = new Token(
+export const FETH = new Token(
   SupportedChainId.GOERLI,
-  '0x175622afB13B092F13C1885A33Da308Dc8A2CC8C',
+  '0xBE1cB266c6ED273d8973bc38858DC9dEa430E9F0',
+  18,
+  'FETH',
+  'FETH'
+)
+
+export const ABC = new Token(
+  SupportedChainId.GOERLI,
+  '0xe6EA97942989B690d1237a23ad9A91432A22320F',
   18,
   'ABC',
   'ABC'
-)
-
-export const WETH = new Token(
-  SupportedChainId.GOERLI,
-  '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
-  18,
-  'WETH',
-  'Wrapped Ether'
 )
 
 // Transactions
