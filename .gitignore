@@ -424,4 +424,4 @@ cache
 artifacts
 /final-project.iml
 
-**config.ts
+pools/hardhat.config.ts
