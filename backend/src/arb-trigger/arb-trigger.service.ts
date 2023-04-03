@@ -15,7 +15,7 @@ import {computePoolAddress} from "@uniswap/v3-sdk";
 import {
   ARBITRAGE_CONTRACT_ABI,
   ARBITRAGE_CONTRACT_ADDRESS,
-  Dex, MAX_GAS_PRICE_IN_ETH,
+  Dex, MAX_GAS_COST_IN_ETH,
   SUSHISWAP_FACTORY_ADDRESS, SUSHISWAP_SWAP_ROUTER_ADDRESS,
   TOKEN_LOAN,
   TOKEN_PAIR,
@@ -42,6 +42,7 @@ export class ArbTriggerService {
   private sushiRouter: Contract;
 
   private stakeToken: Contract;
+  private loanToken: Contract;
 
   private arbitrageContract: Contract;
 
@@ -60,6 +61,12 @@ export class ArbTriggerService {
 
     this.stakeToken = new ethers.Contract(
       TOKEN_STAKING.address,
+      IERC20.abi,
+      this.chainProviderService.getProvider(),
+    );
+
+    this.loanToken = new ethers.Contract(
+      TOKEN_LOAN.address,
       IERC20.abi,
       this.chainProviderService.getProvider(),
     );
@@ -150,7 +157,7 @@ export class ArbTriggerService {
       console.log("\n");
 
       console.log("Choosing arbitrage strategy...");
-      const strategy = await this.chooseStrategy(uniVsSushiDiffPercentage)
+      const strategy = await this.chooseStrategy(uniPoolRatio, sushiPoolRatio, uniVsSushiDiffPercentage)
 
       if (!strategy) {
         return;
@@ -211,14 +218,14 @@ export class ArbTriggerService {
 
     const sqrtPriceX96 = slot0[0];
 
-    return this.getPriceRatioUni({
+    return await this.getPriceRatioUni({
       SqrtX96: sqrtPriceX96,
       Decimal0: TOKEN_PAIR[0].decimals,
       Decimal1: TOKEN_PAIR[1].decimals,
     });
   }
 
-  private getPriceRatioUni(PoolInfo): PriceRatio {
+  private async getPriceRatioUni(PoolInfo): Promise<PriceRatio> {
     let sqrtPriceX96: any = PoolInfo.SqrtX96;
     let Decimal0: any = PoolInfo.Decimal0
     let Decimal1: any = PoolInfo.Decimal1;
@@ -226,13 +233,18 @@ export class ArbTriggerService {
     // @ts-ignore
     let buyOneOfToken0 = (sqrtPriceX96 * sqrtPriceX96 * (10 ** Decimal0) / (10 ** Decimal1) / (JSBI.BigInt(2) ** (JSBI.BigInt(192))).toFixed(Decimal1));
 
+    let liquidityStakingToken = await this.stakeToken.balanceOf(this.uniPool.address);
+    let liquidityLoanToken = await this.loanToken.balanceOf(this.uniPool.address);
+
     //always return price ratio for pair TOKEN_STAKING/TOKEN_LOAN !
     if (BigInt(TOKEN_STAKING.address) > BigInt(TOKEN_LOAN.address)) {
       buyOneOfToken0 = 1 / buyOneOfToken0;
     }
 
     return {
-      ratio: buyOneOfToken0
+      ratio: buyOneOfToken0,
+      liquidityStakingToken: liquidityStakingToken,
+      liquidityLoanToken: liquidityLoanToken
     }
   }
 
@@ -244,39 +256,58 @@ export class ArbTriggerService {
     //always return price ratio for pair TOKEN_STAKING/TOKEN_LOAN !
     if (BigInt(TOKEN_STAKING.address) > BigInt(TOKEN_LOAN.address)) {
       buyOneOfToken0 = 1 / buyOneOfToken0;
+      let tmp = reserveToken0;
+      reserveToken0 = reserveToken1;
+      reserveToken1 = tmp;
     }
 
     return {
-      ratio: buyOneOfToken0
+      ratio: buyOneOfToken0,
+      liquidityStakingToken: reserveToken0,
+      liquidityLoanToken: reserveToken1
     }
 
   }
 
-  private async chooseStrategy(uniVsSushiDiffPercentage: number): Promise<Strategy> {
+  private async chooseStrategy(uniPoolRatio : PriceRatio, sushiPoolRatio : PriceRatio, uniVsSushiDiffPercentage: number): Promise<Strategy> {
 
     let sellDex, buyDex;
+    let liquidity;
 
     if (uniVsSushiDiffPercentage > 0) { //if percentage is positive, price on UNISWAP is higher - we sell there
       sellDex = Dex.UNISWAP;
       buyDex = Dex.SUSHISWAP
+      liquidity = uniPoolRatio.liquidityStakingToken;
     } else {
       sellDex = Dex.SUSHISWAP;
       buyDex = Dex.UNISWAP
+      liquidity = sushiPoolRatio.liquidityStakingToken;
     }
+
+    // totalStaked: await this.arbitrageContract.totalStaked(), todo: when arbitrage contract is ready
+    let totalStaked : BigNumber = await this.stakeToken.balanceOf(ARBITRAGE_CONTRACT_ADDRESS);
+
+    //max sell amount is limited by total liquidity in the selling pool and adjusted by the difference between pools
+    let maxSellAmountStr = ethers.utils.formatUnits(totalStaked.gt(liquidity) ? liquidity : totalStaked, TOKEN_STAKING.decimals);
+    let maxSellAmount = parseFloat(maxSellAmountStr) / Math.abs(uniVsSushiDiffPercentage);
+
 
     const strategy = {
       buyToken: TOKEN_LOAN,
       sellToken: TOKEN_STAKING,
       buyDex: buyDex, //here we have to buy TOKEN_STAKING for TOKEN_LOAN
       sellDex: sellDex, //here we have to sell TOKEN_STAKING for TOKEN_LOAN
-      totalStaked: await this.arbitrageContract.totalStaked(),
-      currentProfit: await this.arbitrageContract.totalProfits(),
+      totalStaked: totalStaked,
+      maxSellAmount: ethers.utils.parseUnits(maxSellAmount.toString(), TOKEN_STAKING.decimals),
+      currentProfit: await this.stakeToken.balanceOf(ARBITRAGE_CONTRACT_ADDRESS),
+      // currentProfit: await this.arbitrageContract.totalProfits(), todo: when arbitrage contract is ready
     };
 
     console.table({
       "Sell token": strategy.sellToken.symbol,
       "Sell at Dex": Dex[strategy.sellDex],
-      "Total staked (max trade amount)": ethers.utils.formatUnits(strategy.totalStaked, strategy.sellToken.decimals),
+      "Liquidity in sell-to pool": ethers.utils.formatUnits(liquidity, strategy.sellToken.decimals) + " " + strategy.sellToken.symbol,
+      "Max sell amount": ethers.utils.formatUnits(strategy.maxSellAmount, strategy.sellToken.decimals),
       "Buy token": strategy.buyToken.symbol,
       "Rebuy at Dex": Dex[strategy.buyDex],
     });
@@ -284,15 +315,18 @@ export class ArbTriggerService {
     return strategy;
   }
 
+
+
   private async calculateProfitability(strategy: Strategy): Promise<Profitability> {
 
-    const maxAmount = parseFloat(ethers.utils.formatUnits(strategy.totalStaked, strategy.sellToken.decimals));
-    const step = maxAmount / 5;
+    const maxAmount = parseFloat(ethers.utils.formatUnits(strategy.maxSellAmount, strategy.sellToken.decimals));
+    const steps = 5;
+    const step = maxAmount / steps;
 
     let mostProfit: BigNumber = null;
     let amountWithMostProfit = maxAmount;
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < steps; i++) {
       const amount = maxAmount - (i * step);
       const amountBN = ethers.utils.parseUnits(amount.toString(), strategy.sellToken.decimals);
 
@@ -337,17 +371,16 @@ export class ArbTriggerService {
       "Trade with amount": ethers.utils.formatUnits(strategy.amountWithMostProfit, TOKEN_STAKING.decimals) + " " + TOKEN_STAKING.symbol,
     });
 
-    const maxGasPrice = ethers.utils.parseUnits(MAX_GAS_PRICE_IN_ETH, "ether");
-    const gasOk = maxGasPrice.gt(gasPrice);
+    const maxGasCost = ethers.utils.parseUnits(MAX_GAS_COST_IN_ETH, "ether");
+    const gasOk = maxGasCost.gt(gasPrice);
     const profitOk = profitability.profit.gt(0);
-    console.log("GAS price: " + ethers.utils.formatUnits(gasPrice, 'ether') + " ETH (" + "max: " + ethers.utils.formatUnits(maxGasPrice, 'ether') + " ETH)" + (gasOk ? " OK" : "  NOT"));
+    console.log("GAS cost: " + ethers.utils.formatUnits(gasCost, 'ether') + " ETH (" + "max: " + ethers.utils.formatUnits(maxGasCost, 'ether') + " ETH)" + (gasOk ? " OK" : "  NOT"));
     console.log("Profit: " + ethers.utils.formatUnits(profitability.profit, TOKEN_STAKING.decimals) + " " + TOKEN_STAKING.symbol + (profitOk ? " OK" : "  NOT"));
 
     if (!gasOk || !profitOk) {
       console.log("Strategy not profitable, skipping execution");
       return null;
     }
-
 
     return profitability;
   }
@@ -368,7 +401,7 @@ export class ArbTriggerService {
   }
 
   private async executeStrategy(strategy: Strategy): Promise<Execution> {
-    console.log("Parameters: " + strategy.sellDex + ", " + strategy.sellToken.symbol + ", " + strategy.buyToken.symbol + ", " + ethers.utils.formatUnits(strategy.amountWithMostProfit, strategy.sellToken.decimals));
+    console.log("Parameters: " + Dex[strategy.sellDex] + ", " + strategy.sellToken.symbol + ", " + strategy.buyToken.symbol + ", " + ethers.utils.formatUnits(strategy.amountWithMostProfit, strategy.sellToken.decimals));
     const tx = await this.arbitrageContract.performArbitrage(strategy.sellDex, strategy.sellToken.address, strategy.buyToken.address, strategy.amountWithMostProfit);
     const txReceipt = await tx.wait();
     console.log("Arbitrage executed!");
@@ -396,6 +429,8 @@ export class ArbTriggerService {
 
 interface PriceRatio {
   ratio: number,
+  liquidityStakingToken: BigNumber,
+  liquidityLoanToken: BigNumber,
 }
 
 interface Strategy {
@@ -405,6 +440,7 @@ interface Strategy {
   sellDex: Dex,
   totalStaked: BigNumber,
   currentProfit: BigNumber,
+  maxSellAmount: BigNumber,
   amountWithMostProfit?: BigNumber,
 }
 
@@ -415,23 +451,4 @@ interface Execution {
 interface Profitability {
   gasCost: BigNumber,
   profit: BigNumber,
-}
-
-function fromReadableAmount(amount: number, decimals: number): JSBI {
-  const extraDigits = Math.pow(10, countDecimals(amount))
-  const adjustedAmount = amount * extraDigits
-  return JSBI.divide(
-    JSBI.multiply(
-      JSBI.BigInt(adjustedAmount),
-      JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(decimals))
-    ),
-    JSBI.BigInt(extraDigits)
-  )
-}
-
-function countDecimals(x: number) {
-  if (Math.floor(x) === x) {
-    return 0
-  }
-  return x.toString().split('.')[1].length || 0
 }
