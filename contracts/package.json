@@ -13,6 +13,8 @@
     "@openzeppelin/contracts": "^4.8.2",
     "@uniswap/sdk": "^3.0.3",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "@uniswap/v3-core": "^1.0.1",
+    "@uniswap/v3-periphery": "^1.4.3",
     "mocha": "^10.2.0",
     "node-modules": "^1.0.1"
   },
