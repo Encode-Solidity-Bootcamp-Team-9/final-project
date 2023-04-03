@@ -11,8 +11,7 @@ import * as Joi from 'joi';
     validationSchema: Joi.object({
       WALLET_ADDRESS: Joi.string().required(),
       WALLET_PRIVATE_KEY: Joi.string().required(),
-      ALCHEMY_API_KEY: Joi.string().required(),
-      PRICE_DIFF_PERCENTAGE: Joi.number().required()
+      ALCHEMY_API_KEY: Joi.string().required()
     }),
   })],
   controllers: [AppController],

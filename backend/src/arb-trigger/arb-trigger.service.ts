@@ -27,6 +27,7 @@ import {JSBI} from "@uniswap/sdk";
 import {Token} from "@uniswap/sdk-core";
 import {util} from "prettier";
 import getMaxContinuousCount = util.getMaxContinuousCount;
+import {PRICE_DIFF_PERCENTAGE} from "./config";
 
 @Injectable()
 export class ArbTriggerService {
@@ -196,7 +197,7 @@ export class ArbTriggerService {
   private priceDiff(uniPoolRatio: PriceRatio, sushiPoolRatio: PriceRatio) {
     const uniVsSushiDiffPercentage = (((uniPoolRatio.ratio - sushiPoolRatio.ratio) / sushiPoolRatio.ratio) * 100);
 
-    const minDiffPercentage = this.configService.get("PRICE_DIFF_PERCENTAGE");
+    const minDiffPercentage = PRICE_DIFF_PERCENTAGE;
     const isDiffOk = Math.abs(uniVsSushiDiffPercentage) > minDiffPercentage;
     console.log("UNI/SUSHI diff: " + uniVsSushiDiffPercentage.toFixed(2) + "% (min: " + minDiffPercentage.toFixed(2) + "%)" + (isDiffOk ? " OK" : " NOT"));
     return {uniVsSushiDiffPercentage, isDiffOk};
