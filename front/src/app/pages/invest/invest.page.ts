@@ -6,13 +6,22 @@ import { NgxEchartsModule, NGX_ECHARTS_CONFIG } from 'ngx-echarts';
 import { TKN2_SYMBOL } from 'src/app/utils/consts';
 import { EChartsOption } from 'echarts';
 import { generatePieOptions } from '../home/utils';
+import { InfoService } from 'src/app/services/info.service';
+import { UserInfo } from 'src/app/models/user';
+import { ToETHPipe } from 'src/app/pipes/to-eth.pipe';
 
 @Component({
   selector: 'app-invest',
   templateUrl: './invest.page.html',
   styleUrls: ['./invest.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule, NgxEchartsModule],
+  imports: [
+    IonicModule,
+    CommonModule,
+    FormsModule,
+    NgxEchartsModule,
+    ToETHPipe,
+  ],
   providers: [
     {
       provide: NGX_ECHARTS_CONFIG,
@@ -44,7 +53,15 @@ export class InvestPage implements OnInit {
     ],
     [TKN2_SYMBOL, TKN2_SYMBOL]
   );
-  constructor() {}
 
-  ngOnInit() {}
+  public userInfo: UserInfo | undefined;
+
+  constructor(private infoService: InfoService) {}
+
+  ngOnInit() {
+    // get user data
+    this.infoService.getUserInfo().then((user) => {
+      this.userInfo = user;
+    });
+  }
 }

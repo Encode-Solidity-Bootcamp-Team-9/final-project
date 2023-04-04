@@ -41,7 +41,7 @@ export class AnalyticsPage implements OnInit {
       pool0: 'Uniswap',
       pool1: 'Sushiswap',
       used: 1000,
-      fees: 3.2,
+      profits: 3.2,
       date: new Date(),
     },
     {
@@ -49,7 +49,7 @@ export class AnalyticsPage implements OnInit {
       pool0: 'Uniswap',
       pool1: 'Sushiswap',
       used: 500,
-      fees: 1.2,
+      profits: 1.2,
       date: new Date(),
     },
   ];

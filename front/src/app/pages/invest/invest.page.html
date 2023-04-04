@@ -106,7 +106,9 @@
                 <ion-card-title><em>NAS</em> Staked + Profits</ion-card-title>
               </ion-card-header>
               <ion-card-content>
-                <div>1000 <em>NAS</em></div>
+                <div *ngIf="userInfo">
+                  {{ userInfo.staked | toETH }} <em>NAS</em>
+                </div>
                 <div>Locked untill: 16th Jan 2024</div>
                 <ion-button>Unstake + claim</ion-button>
               </ion-card-content>
