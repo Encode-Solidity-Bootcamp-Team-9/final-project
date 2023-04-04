@@ -1,0 +1,148 @@
+<ion-content>
+  <div class="container">
+    <ion-accordion-group [multiple]="true" [value]="openState">
+      <!-- Summary -->
+      <ion-accordion value="summary" toggleIconSlot="start">
+        <ion-item slot="header">
+          <div class="timeline-step">
+            <div class="hexagon"><div>0</div></div>
+          </div>
+          <ion-label>How to invest</ion-label>
+        </ion-item>
+        <div class="ion-padding" slot="content">
+          <p>
+            In order to invest in Team 9 arbitrage, you need to stake
+            <em>NAS</em>. You can get <em>NAS</em> buy swapping
+            <em>FETH</em> (FakeETH).
+          </p>
+          <p>
+            We offer new investors a free amount of <em>FETH</em> (step 1: Mint
+            FETH). After minting you can swap your <em>FETH</em> for some
+            <em>NAS</em>.
+          </p>
+          <p>
+            You can then stake your <em>NAS</em> for a share of the profits.
+          </p>
+        </div>
+      </ion-accordion>
+
+      <!-- Mint -->
+      <ion-accordion value="mint" toggleIconSlot="start">
+        <ion-item slot="header">
+          <div class="timeline-step">
+            <div class="hexagon"><div>1</div></div>
+          </div>
+          <ion-label
+            >Mint <span style="text-transform: none">Fake</span>ETH
+            (FETH)</ion-label
+          >
+        </ion-item>
+        <div class="ion-padding" slot="content">
+          <p>
+            If your wallet has never minted <em>FETH</em>. You can use this
+            faucet to mint up to <em>10.0 FETH</em>.
+          </p>
+          <div class="buttons">
+            <ion-button color="primary">Mint FETH</ion-button>
+          </div>
+        </div>
+      </ion-accordion>
+
+      <!-- SWAP -->
+      <ion-accordion value="swap" toggleIconSlot="start">
+        <ion-item slot="header">
+          <div class="timeline-step">
+            <div class="hexagon"><div>2</div></div>
+          </div>
+          <ion-label>Swap FETH for NAS</ion-label>
+        </ion-item>
+        <div class="ion-padding" slot="content">
+          <p>
+            Swap your <em>FETH</em> for some <em>NAS</em>. We automatically
+            route you to the best price using either <em>Uniswap</em> pool or
+            <em>Sushiswap</em> pool. You currently have <em>1.05 FETH</em>.
+          </p>
+          <div class="swap-container">
+            <div class="inputs">
+              <ion-label class="balance">Balance <em>1.05 FETH</em></ion-label>
+              <ion-input label="FETH" placeholder="0"></ion-input>
+              <ion-input
+                label="NAS"
+                placeholder="0"
+                fill="outline"
+                disabled
+              ></ion-input>
+              <ion-button>Approve</ion-button>
+            </div>
+          </div>
+        </div>
+      </ion-accordion>
+
+      <!-- Stake -->
+      <ion-accordion value="invest" toggleIconSlot="start" class="important">
+        <ion-item slot="header">
+          <div class="timeline-step">
+            <div class="hexagon"><div>3</div></div>
+          </div>
+          <ion-label>Stake Your NAS to get a share of fees</ion-label>
+        </ion-item>
+        <div class="ion-padding" slot="content" class="invest-container">
+          <div class="invest-infos">
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title><em>NAS</em> Balance</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <div>1000 <em>NAS</em></div>
+                <div class="inputs">
+                  <ion-input label="NAS" placeholder="0"></ion-input>
+                </div>
+                <ion-button>Stake</ion-button>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title><em>NAS</em> Staked + Profits</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <div>1000 <em>NAS</em></div>
+                <div>Locked untill: 16th Jan 2024</div>
+                <ion-button>Unstake + claim</ion-button>
+              </ion-card-content>
+            </ion-card>
+          </div>
+          <div class="charts">
+            <ion-card class="chart">
+              <ion-card-header>
+                <ion-card-title>Your Stake vs Total Stake</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <div
+                  echarts
+                  [options]="currentPosition"
+                  class="chart-container"
+                ></div>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="chart">
+              <ion-card-header>
+                <ion-card-title
+                  >Your Historical Stake vs Your Share of Fees</ion-card-title
+                >
+              </ion-card-header>
+              <ion-card-content>
+                <div
+                  echarts
+                  [options]="totalProfits"
+                  class="chart-container"
+                ></div>
+              </ion-card-content>
+            </ion-card>
+          </div>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
+  </div>
+</ion-content>

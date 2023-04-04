@@ -1,0 +1,26 @@
+#home {
+  .name {
+    color: var(--ion-color-white);
+    font-size: 60px;
+    line-height: normal;
+    font-variant: bold;
+  }
+  .subtext {
+    font-size: 30px;
+    line-height: normal;
+  }
+
+  @media (max-width: 576px) {
+    // word-break: break-all;
+    .name {
+      font-size: 40px;
+    }
+    .subtext {
+      font-size: 25px;
+    }
+  }
+
+  .image {
+    margin-top: 16px;
+  }
+}

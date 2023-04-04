@@ -422,6 +422,10 @@ typechain-types
 # Hardhat files
 cache
 artifacts
+
 /final-project.iml
 
 pools/hardhat.config.ts
+
+# front
+www/*

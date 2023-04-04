@@ -1,0 +1,46 @@
+<ion-app>
+  <ion-split-pane contentId="main" [class.small]="smallSideMenu" when="xs">
+    <ion-menu contentId="main" class="hide-sm">
+      <ion-content>
+        <div class="menu-container">
+          <ion-button fill="clear" (click)="toggleMenu()">
+            <ion-icon name="menu-sharp" slot="icon-only"></ion-icon>
+          </ion-button>
+          <div class="infos">
+            <ion-button *ngIf="!account">
+              <ion-icon name="wallet" slot="start"></ion-icon>
+              <ion-label *ngIf="!smallSideMenu">Connect Wallet</ion-label>
+            </ion-button>
+            <ion-button *ngIf="account">
+              <ion-icon name="wallet" slot="start"></ion-icon>
+              <ion-label *ngIf="!smallSideMenu">{{ account }}</ion-label>
+            </ion-button>
+          </div>
+
+          <div class="navigation">
+            <ion-item
+              button
+              *ngFor="let page of appPages"
+              [class.active]="page.active"
+              (click)="navigateTo(page.url)"
+            >
+              <ion-icon [name]="page.icon"></ion-icon>
+              <ion-label>{{ page.title }}</ion-label>
+            </ion-item>
+          </div>
+
+          <div class="contact">
+            <ion-button fill="clear" (click)="goToLink('')">
+              <ion-icon slot="icon-only" name="logo-github"></ion-icon>
+            </ion-button>
+            <ion-button fill="clear" (click)="goToLink('')">
+              <ion-icon slot="icon-only" name="logo-twitter"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+      </ion-content>
+    </ion-menu>
+
+    <ion-router-outlet id="main"></ion-router-outlet>
+  </ion-split-pane>
+</ion-app>

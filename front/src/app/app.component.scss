@@ -1,0 +1,90 @@
+ion-content#main {
+  background: var(--ion-background-color);
+}
+
+ion-split-pane {
+  --side-width: 370px;
+  --side-min-width: 370px;
+  --side-max-width: 370px;
+  ion-menu {
+    --width: 370px;
+    --min-width: 370px;
+    --max-width: 370px;
+    --background: var(--ion-background-color-lighter);
+    ion-content {
+      --background: var(--ion-background-color--lighter);
+    }
+    .menu-container {
+      padding: 8px 0px;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      color: var(--ion-color-white);
+      .infos {
+        display: flex;
+        justify-content: center;
+      }
+      .navigation {
+        flex: 1;
+        margin-top: 24px;
+        ion-item {
+          font-size: 15px;
+          text-transform: uppercase;
+          --background: transparent;
+          text-align: center;
+          --color: var(--ion-color-white-shade);
+          --border-width: 0px;
+          --inner-border-width: 0px;
+          &.active {
+            --color: var(--ion-color-primary);
+            --background: var(--ion-color-primary-opacity);
+            ion-icon {
+              color: var(--ion-color-primary);
+            }
+          }
+          ion-icon {
+            color: var(--ion-color-white-shade);
+          }
+        }
+      }
+
+      .contact {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        text-align: center;
+        color: var(--ion-color-white);
+        font-weight: bold;
+        margin-bottom: 8px;
+        ion-icon {
+          color: var(--ion-color-primary);
+        }
+      }
+    }
+  }
+  &.small {
+    --side-width: 60px;
+    --side-min-width: 60px;
+    --side-max-width: 60px;
+    ion-menu {
+      --width: 60px;
+      --min-width: 60px;
+      --max-width: 60px;
+      .menu-container {
+        .infos {
+        }
+        .navigation {
+          ion-item {
+            ion-label {
+              display: none;
+            }
+          }
+        }
+
+        .contact {
+          flex-direction: column;
+        }
+      }
+    }
+  }
+}
