@@ -6,6 +6,7 @@ import {ConfigModule} from "@nestjs/config";
 import { ContractsProviderService } from './contracts-provider/contracts-provider.service';
 import { ChainProviderService } from './chain-provider/chain-provider.service';
 import * as Joi from 'joi';
+import {PriceCalculation} from "./arb-trigger/price-calculation-provider.service";
 
 @Module({
   imports: [ArbTriggerModule, ConfigModule.forRoot({
