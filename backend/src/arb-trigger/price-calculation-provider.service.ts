@@ -33,7 +33,7 @@ export class PriceCalculation {
     return {uniVsSushiDiffPercentage, isDiffOk};
   }
 
-  private async getUniPoolRatio(): Promise<IPriceRatio> {
+  public async getUniPoolRatio(): Promise<IPriceRatio> {
     const slot0 = await this.contracts.uniPool.slot0();
 
     const sqrtPriceX96 = slot0[0];
@@ -69,7 +69,7 @@ export class PriceCalculation {
     }
   }
 
-  private async getSushiPoolRatio(): Promise<IPriceRatio> {
+  public async getSushiPoolRatio(): Promise<IPriceRatio> {
     const sushiPool = await this.contracts.getSushiPool()
     let [reserveToken0, reserveToken1] = await sushiPool.getReserves();
 

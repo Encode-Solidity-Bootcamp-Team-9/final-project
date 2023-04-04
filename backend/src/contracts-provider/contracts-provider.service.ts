@@ -3,7 +3,6 @@ import {Contract, ethers} from "ethers";
 import {ConfigService} from "@nestjs/config";
 import {ChainProviderService} from "../chain-provider/chain-provider.service";
 import {
-  ARBITRAGE_CONTRACT_ABI,
   ARBITRAGE_CONTRACT_ADDRESS, SUSHISWAP_FACTORY_ADDRESS, SUSHISWAP_SWAP_ROUTER_ADDRESS,
   TOKEN_LOAN, TOKEN_PAIR,
   TOKEN_STAKING,
@@ -18,6 +17,7 @@ import * as ISushiswapV2Pair from "@uniswap/v2-core/build/IUniswapV2Pair.json"
 import * as IUniswapV2Router02 from "@uniswap/v2-periphery/build/IUniswapV2Router02.json";
 import * as IERC20 from "@uniswap/v2-core/build/IERC20.json"
 import * as Quoter from '@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Quoter.json'
+import * as IArbitrage from "./abi/Arbitrage.json"
 
 @Injectable()
 export class ContractsProviderService {
@@ -32,7 +32,6 @@ export class ContractsProviderService {
 
   stakeToken: Contract;
   loanToken: Contract;
-
   arbitrageContract: Contract;
 
   constructor(
@@ -42,7 +41,7 @@ export class ContractsProviderService {
 
     this.arbitrageContract = new ethers.Contract(
       ARBITRAGE_CONTRACT_ADDRESS,
-      ARBITRAGE_CONTRACT_ABI,
+      IArbitrage.abi,
       this.chainProviderService.getSigner(),
     );
 
