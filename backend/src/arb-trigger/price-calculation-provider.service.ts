@@ -12,6 +12,7 @@ export class PriceCalculation {
   ) {
   }
 
+  /* Check prices on both pools and return price ratio for both pools */
   async checkPrices() {
     const uniPoolRatio: IPriceRatio = await this.getUniPoolRatio();
     console.log("[UNI] " + TOKEN_STAKING.symbol + "/" + TOKEN_LOAN.symbol + " : " + uniPoolRatio.ratio);
@@ -33,10 +34,7 @@ export class PriceCalculation {
   }
 
   private async getUniPoolRatio(): Promise<IPriceRatio> {
-    const [slot0] =
-      await Promise.all([
-        this.contracts.uniPool.slot0(),
-      ]);
+    const slot0 = await this.contracts.uniPool.slot0();
 
     const sqrtPriceX96 = slot0[0];
 
@@ -58,7 +56,8 @@ export class PriceCalculation {
     let liquidityStakingToken = await this.contracts.stakeToken.balanceOf(this.contracts.uniPool.address);
     let liquidityLoanToken = await this.contracts.loanToken.balanceOf(this.contracts.uniPool.address);
 
-    //always return price ratio for pair TOKEN_STAKING/TOKEN_LOAN !
+    //always return price ratio for pair TOKEN_STAKING/TOKEN_LOAN and not the other way around!!
+    //Uniswap sorts the tokens by address, so we have to reverse the ratio if the order is different.
     if (BigInt(TOKEN_STAKING.address) > BigInt(TOKEN_LOAN.address)) {
       buyOneOfToken0 = 1 / buyOneOfToken0;
     }
@@ -76,7 +75,8 @@ export class PriceCalculation {
 
     let buyOneOfToken0 = (reserveToken1 / reserveToken0) / (10 ** (TOKEN_PAIR[1].decimals - TOKEN_PAIR[0].decimals))
 
-    //always return price ratio for pair TOKEN_STAKING/TOKEN_LOAN !
+    //always return price ratio for pair TOKEN_STAKING/TOKEN_LOAN and not the other way around!!
+    //Uniswap sorts the tokens by address, so we have to reverse the ratio if the order is different.
     if (BigInt(TOKEN_STAKING.address) > BigInt(TOKEN_LOAN.address)) {
       buyOneOfToken0 = 1 / buyOneOfToken0;
       let tmp = reserveToken0;
@@ -91,7 +91,6 @@ export class PriceCalculation {
     }
 
   }
-
 }
 
 export interface IPriceRatio {

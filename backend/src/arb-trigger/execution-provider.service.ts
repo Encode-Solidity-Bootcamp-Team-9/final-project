@@ -25,8 +25,8 @@ export class StrategyExecution {
   }
 
   async execute(strategy: IStrategy): Promise<IExecution> {
-    console.log("Parameters: " + Dex[strategy.sellDex] + ", " + strategy.sellToken.symbol + ", " + strategy.buyToken.symbol + ", " + ethers.utils.formatUnits(strategy.amountWithMostProfit, strategy.sellToken.decimals));
-    const tx = await this.contracts.arbitrageContract.performArbitrage(strategy.sellDex, strategy.sellToken.address, strategy.buyToken.address, strategy.amountWithMostProfit);
+    console.log("Parameters: " + Dex[strategy.sellDex] + ", " + strategy.sellToken.symbol + ", " + strategy.buyToken.symbol + ", " + ethers.utils.formatUnits(strategy.firstTrade0, strategy.sellToken.decimals));
+    const tx = await this.contracts.arbitrageContract.performArbitrage(strategy.sellDex, strategy.sellToken.address, strategy.buyToken.address, strategy.firstTrade0);
     const txReceipt = await tx.wait();
     console.log("Arbitrage executed!");
     return {

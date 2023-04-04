@@ -27,47 +27,48 @@ export class DetermineProfitability {
 
   async calculate(strategy: IStrategy): Promise<IProfitability> {
 
-    const maxAmount = parseFloat(ethers.utils.formatUnits(strategy.maxSellAmount, strategy.sellToken.decimals));
-    const steps = 10;
-    const step = maxAmount / steps;
+    const maxSellAmount: number = parseFloat(ethers.utils.formatUnits(strategy.maxSellAmount, strategy.sellToken.decimals));
+    const calculationSteps = 10;
+    const oneStepValue = maxSellAmount / calculationSteps;
 
     let mostProfit: BigNumber = null;
-    let amountWithMostProfit = maxAmount;
+    let firstTrade0, firstTrade1BN, secondTrade0BN, secondTrade1BN;
 
-    for (let i = 0; i < steps; i++) {
-      const amount = maxAmount - (i * step);
-      const amountBN = ethers.utils.parseUnits(amount.toString(), strategy.sellToken.decimals);
+    for (let i = 0; i < calculationSteps; i++) {
+      const amountWeWantToSell = maxSellAmount - (i * oneStepValue);
+      const amountWeWantToSellBN = ethers.utils.parseUnits(amountWeWantToSell.toString(), strategy.sellToken.decimals);
 
-      let token2Amount, tokenAmountAfter: BigNumber;
+      let token2AmountBN, amountAfterArbitrageBN: BigNumber;
       if (strategy.sellDex === Dex.UNISWAP) {
-        token2Amount = await this.tradeOnUni(strategy.sellToken.address, strategy.buyToken.address, amountBN);
-        tokenAmountAfter = await this.tradeOnSushi(strategy.buyToken.address, strategy.sellToken.address, token2Amount);
+        token2AmountBN = await this.tradeOnUni(strategy.sellToken.address, strategy.buyToken.address, amountWeWantToSellBN);
+        amountAfterArbitrageBN = await this.tradeOnSushi(strategy.buyToken.address, strategy.sellToken.address, token2AmountBN);
       } else {
-        token2Amount = await this.tradeOnSushi(strategy.sellToken.address, strategy.buyToken.address, amountBN);
-        tokenAmountAfter = await this.tradeOnUni(strategy.buyToken.address, strategy.sellToken.address, token2Amount);
+        token2AmountBN = await this.tradeOnSushi(strategy.sellToken.address, strategy.buyToken.address, amountWeWantToSellBN);
+        amountAfterArbitrageBN = await this.tradeOnUni(strategy.buyToken.address, strategy.sellToken.address, token2AmountBN);
       }
 
-      // console.log(TOKEN_STAKING.symbol + " amount before trade: " + ethers.utils.formatUnits(amountBN, TOKEN_STAKING.decimals));
-      // console.log(TOKEN_STAKING.symbol + " amount after trade: " + ethers.utils.formatUnits(tokenAmountAfter, TOKEN_STAKING.decimals));
+      let profit = amountAfterArbitrageBN.sub(amountWeWantToSellBN);
+      console.log(i + ": Profit " + ethers.utils.formatUnits(profit, strategy.sellToken.decimals) + " " + strategy.sellToken.symbol + " (Trade amountWeWantToSell: " + amountWeWantToSell + ")");
 
-      let profit = tokenAmountAfter.sub(amountBN);
-
-      // console.log("Profit: " + ethers.utils.formatUnits(profit, TOKEN_STAKING.decimals) + " " + TOKEN_STAKING.symbol);
-
-      console.log(i + ": Profit " + ethers.utils.formatUnits(profit, strategy.sellToken.decimals) + " " + strategy.sellToken.symbol + " (Trade amount: " + amount + ")");
       if (mostProfit == null || profit.gt(mostProfit)) {
         mostProfit = profit;
-        amountWithMostProfit = amount;
+        firstTrade0 = amountWeWantToSell;
+        firstTrade1BN = token2AmountBN;
+        secondTrade0BN = token2AmountBN;
+        secondTrade1BN = amountAfterArbitrageBN;
       } else {
-        break;
+        break;  //break once we have a lower profit
       }
     }
 
-    const gasPrice = await this.chain.getProvider().getGasPrice();
-    const gasFeesTx = await this.contracts.arbitrageContract.estimateGas.performArbitrage(strategy.buyDex, strategy.sellToken.address, strategy.buyToken.address, ethers.utils.parseUnits(amountWithMostProfit.toString(), strategy.sellToken.decimals));
-    const gasCost = gasFeesTx.mul(gasPrice);
+    strategy.firstTrade0 = ethers.utils.parseUnits(firstTrade0.toString(), strategy.sellToken.decimals);
+    strategy.firstTrade1 = firstTrade1BN;
+    strategy.secondTrade0 = secondTrade0BN;
+    strategy.secondTrade1 = secondTrade1BN;
 
-    strategy.amountWithMostProfit = ethers.utils.parseUnits(amountWithMostProfit.toString(), strategy.sellToken.decimals);
+    const gasPrice = await this.chain.getProvider().getGasPrice();
+    const gasFeesTx = await this.contracts.arbitrageContract.estimateGas.performArbitrage(strategy.buyDex, strategy.sellToken.address, strategy.buyToken.address, strategy.firstTrade0);
+    const gasCost = gasFeesTx.mul(gasPrice);
 
     const profitability = {
       gasCost: gasCost,
@@ -79,7 +80,7 @@ export class DetermineProfitability {
       "Gas fees": ethers.utils.formatUnits(gasFeesTx, 'wei') + " wei",
       "Gas cost": ethers.utils.formatUnits(profitability.gasCost, 'ether') + " ETH",
       "Profit": ethers.utils.formatUnits(profitability.profit, TOKEN_STAKING.decimals) + " " + TOKEN_STAKING.symbol,
-      "Trade with amount": ethers.utils.formatUnits(strategy.amountWithMostProfit, TOKEN_STAKING.decimals) + " " + TOKEN_STAKING.symbol,
+      "Trade with amount": firstTrade0 + " " + TOKEN_STAKING.symbol,
     });
 
     const maxGasCost = ethers.utils.parseUnits(MAX_GAS_COST_IN_ETH, "ether");

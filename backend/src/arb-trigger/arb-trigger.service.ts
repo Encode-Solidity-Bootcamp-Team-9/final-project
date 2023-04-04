@@ -60,7 +60,6 @@ export class ArbTriggerService {
      * - calculate profitability of arbitrage strategy
      * - execute arbitrage strategy
      * - check if arbitrage was successful*/
-
   public async arbitrage(dexThatChanged) {
 
     //if arbitrage is already in progress, skip the execution

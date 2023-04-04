@@ -19,7 +19,7 @@ export class ChooseStrategy {
     let sellDex, buyDex;
     let liquidity;
 
-    if (uniVsSushiDiffPercentage > 0) { //if percentage is positive, price on UNISWAP is higher - we sell there
+    if (uniVsSushiDiffPercentage > 0) { //if percentage is positive, price on UNISWAP is higher - we will sell there
       sellDex = Dex.UNISWAP;
       buyDex = Dex.SUSHISWAP
       liquidity = uniPoolRatio.liquidityStakingToken;
@@ -32,9 +32,10 @@ export class ChooseStrategy {
     // totalStaked: await this.arbitrageContract.totalStaked(), todo: when arbitrage contract is ready
     let totalStaked: BigNumber = await this.contracts.stakeToken.balanceOf(ARBITRAGE_CONTRACT_ADDRESS);
 
-    //max sell amount is limited by total liquidity in the selling pool and divided by 10
-    let maxSellAmountStr = ethers.utils.formatUnits(totalStaked.gt(liquidity) ? liquidity : totalStaked, TOKEN_STAKING.decimals);
-    let maxSellAmount = parseFloat(maxSellAmountStr) / Math.abs(10);
+    //max sell amount is limited by total liquidity in the selling pool. We want to sell max 10% of liquidity.
+    let maxSellAmount = parseFloat(ethers.utils.formatUnits(totalStaked, TOKEN_STAKING.decimals))
+    const liquidityAmount = parseFloat(ethers.utils.formatUnits(liquidity, TOKEN_STAKING.decimals));
+    maxSellAmount = Math.min(maxSellAmount, liquidityAmount / 10);
 
 
     const strategy = {
@@ -71,6 +72,9 @@ export interface IStrategy {
   totalStaked: BigNumber,
   currentProfit: BigNumber,
   maxSellAmount: BigNumber,
-  amountWithMostProfit?: BigNumber,
+  firstTrade0?: BigNumber,
+  firstTrade1?: BigNumber,
+  secondTrade0?: BigNumber,
+  secondTrade1?: BigNumber,
 }
 
