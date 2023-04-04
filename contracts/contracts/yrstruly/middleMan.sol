@@ -82,13 +82,22 @@ contract MiddleMan is Ownable {
         require(stblSuccess, "STBL token transfer failed");
     }
 
-    function arbitrage() external onlyOwner() {
+    function arbitrage (
+        uint256 sushiSide,
+        uint256 sushiIn,
+        uint256 uniSide,
+        uint256 uniIn
+    ) external onlyOwner() {
         // Will call both swap function
-        // Order to be determined
+        // 0 means we sell our FETH, so path is FETH -> STBL
+        // 1 means we sell our STBL, so path is STBL -> FETH
+
+        swapOnSushi(sushiSide, sushiIn);
+        swapOnUni(uniSide, uniIn);
 
     }
 
-    function swapOnUni(uint256 side) external {
+    function swapOnUni(uint256 side, uint amtIn) private {
         // Setting at 0 for simplicity
         uint256 amtOutMin = 0;
         uint160 priceLimit = 0;
@@ -99,11 +108,11 @@ contract MiddleMan is Ownable {
         if (side == 0) {
             tknIn = address(feth);
             tknOut = address(stbl);
-            feth.approve(address(uniswapRouter), 1000000000000000);
+            feth.approve(address(uniswapRouter), amtIn);
         } else if (side == 1) {
             tknIn = address(stbl);
             tknOut = address(feth);
-            stbl.approve(address(uniswapRouter), 1000000000000000);
+            stbl.approve(address(uniswapRouter), amtIn);
         } else {
             revert();
         }
@@ -116,7 +125,7 @@ contract MiddleMan is Ownable {
                 fee: 3000,
                 recipient: address(this),
                 deadline: block.timestamp,
-                amountIn: 1000000000000000,
+                amountIn: amtIn,
                 amountOutMinimum: amtOutMin,
                 sqrtPriceLimitX96: priceLimit
             });
@@ -126,26 +135,22 @@ contract MiddleMan is Ownable {
 
     }
 
-    function swapOnSushi(uint256 side) private {
+    function swapOnSushi(uint256 side, uint256 amtIn) private {
         // 0 means we sell our FETH, so path is FETH -> STBL
         // 1 means we sell our STBL, so path is STBL -> FETH
         address[] memory path = new address[](2);
-        uint256 amountIn;
-        uint256 amountOutMin;
+        uint256 amountIn = amtIn;
+        uint256 amountOutMin = 1;
 
         if (side == 0) {
             path[0] = address(feth);
             path[1] = address(stbl);
-            feth.approve(address(sushiswapRouter), 1000000000000000);
-            amountIn = 1000000000000000;
-            amountOutMin = 1;
+            feth.approve(address(sushiswapRouter), amountIn);
 
         } else if (side == 1) {
             path[0] = address(stbl);
             path[1] = address(feth);
-            stbl.approve(address(sushiswapRouter), 1000000000000000);
-            amountIn = 1000000000000000;
-            amountOutMin = 1;
+            stbl.approve(address(sushiswapRouter), amountIn);
 
         } else {
             revert();
