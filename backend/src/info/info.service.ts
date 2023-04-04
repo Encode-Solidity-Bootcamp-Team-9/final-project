@@ -34,8 +34,8 @@ export class InfoService {
   async getArbitrageInfo(): Promise<Arbitrage> {
     return {
       address: this.contracts.arbitrageContract.address,
-      totalStaked: await this.contracts.arbitrageContract.totalStaked().toString(),
-      totalProfits: await this.contracts.arbitrageContract.totalProfits().toString()
+      totalStaked: (await this.contracts.arbitrageContract.totalStaked()).toString(),
+      totalProfits: (await this.contracts.arbitrageContract.totalProfits()).toString()
     };
   }
 

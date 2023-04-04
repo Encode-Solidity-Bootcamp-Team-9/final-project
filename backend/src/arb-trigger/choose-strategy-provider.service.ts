@@ -29,8 +29,7 @@ export class ChooseStrategy {
       liquidity = sushiPoolRatio.liquidityStakingToken;
     }
 
-    // totalStaked: await this.arbitrageContract.totalStaked(), todo: when arbitrage contract is ready
-    let totalStaked: BigNumber = await this.contracts.stakeToken.balanceOf(ARBITRAGE_CONTRACT_ADDRESS);
+    let totalStaked : BigNumber = await this.contracts.arbitrageContract.totalStaked();
 
     //max sell amount is limited by total liquidity in the selling pool. We want to sell max 10% of liquidity.
     let maxSellAmount = parseFloat(ethers.utils.formatUnits(totalStaked, TOKEN_STAKING.decimals))
@@ -45,8 +44,7 @@ export class ChooseStrategy {
       sellDex: sellDex, //here we have to sell TOKEN_STAKING for TOKEN_LOAN
       totalStaked: totalStaked,
       maxSellAmount: ethers.utils.parseUnits(maxSellAmount.toString(), TOKEN_STAKING.decimals),
-      currentProfit: await this.contracts.stakeToken.balanceOf(ARBITRAGE_CONTRACT_ADDRESS),
-      // currentProfit: await this.arbitrageContract.totalProfits(), todo: when arbitrage contract is ready
+      currentProfit: await this.contracts.arbitrageContract.totalProfits(),
     };
 
     console.table({
@@ -57,6 +55,11 @@ export class ChooseStrategy {
       "Buy token": strategy.buyToken.symbol,
       "Rebuy at Dex": Dex[strategy.buyDex],
     });
+
+    if(maxSellAmount <= 0) {
+      console.log("Max amount to sell is 0. Can't arbitrage. Contract doesn't have tokens to sell.");
+      return null;
+    }
 
     return strategy;
   }
