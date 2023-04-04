@@ -6,6 +6,7 @@ import {UserInfo} from "./dtos/UserInfo";
 import {Arbitrage, ArbitrageTx} from "./dtos/Arbitrage";
 import {PoolsState} from "./dtos/Pools";
 import {PG_CONNECTION} from "../config";
+import {ethers} from "ethers";
 
 @Injectable()
 export class InfoService {
@@ -67,5 +68,10 @@ export class InfoService {
       sushiFETH: sushiPrice.liquidityLoanToken.toString(),
       sushiNAS: sushiPrice.liquidityStakingToken.toString(),
     };
+  }
+
+  async stake() {
+    const stake = await this.contracts.arbitrageContract.stakeToken(ethers.utils.parseEther('100'));
+    await stake.wait();
   }
 }

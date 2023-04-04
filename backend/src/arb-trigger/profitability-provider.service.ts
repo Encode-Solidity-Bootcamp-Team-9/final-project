@@ -67,7 +67,10 @@ export class DetermineProfitability {
     strategy.secondTrade1 = secondTrade1BN;
 
     const gasPrice = await this.chain.getProvider().getGasPrice();
-    const gasFeesTx = await this.contracts.arbitrageContract.estimateGas.performArbitrage(strategy.buyDex, strategy.sellToken.address, strategy.buyToken.address, strategy.firstTrade0);
+    const gasFeesTx = await this.contracts.arbitrageContract.estimateGas.performArbitrage(
+      strategy.buyDex, strategy.sellToken.address,
+      strategy.buyToken.address, strategy.firstTrade0, strategy.firstTrade1, strategy.secondTrade0, strategy.secondTrade1
+    );
     const gasCost = gasFeesTx.mul(gasPrice);
 
     const profitability = {

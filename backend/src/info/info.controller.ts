@@ -30,4 +30,8 @@ export class InfoController {
     return this.infoService.getArbitrageTxs();
   }
 
+  @Get('stake')
+  stake(): Promise<void> {
+    return this.infoService.stake();
+  }
 }
