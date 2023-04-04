@@ -1,17 +1,7 @@
 import {Injectable} from '@nestjs/common';
-import {
-  ARBITRAGE_CONTRACT_ADDRESS,
-  Dex,
-  MAX_GAS_COST_IN_ETH,
-  PRICE_DIFF_PERCENTAGE,
-  TOKEN_LOAN,
-  TOKEN_PAIR,
-  TOKEN_STAKING, UNISWAP_POOL_FEE_TIER
-} from "../config";
-import {JSBI} from "@uniswap/sdk";
+import {Dex, MAX_GAS_COST_IN_ETH, SLIPPAGE, TOKEN_STAKING, UNISWAP_POOL_FEE_TIER} from "../config";
 import {BigNumber, ethers} from "ethers";
 import {ContractsProviderService} from "../contracts-provider/contracts-provider.service";
-import {IPriceRatio} from "./price-calculation-provider.service";
 import {Token} from "@uniswap/sdk-core";
 import {IStrategy} from "./choose-strategy-provider.service";
 import {ChainProviderService} from "../chain-provider/chain-provider.service";
@@ -40,11 +30,11 @@ export class DetermineProfitability {
 
       let token2AmountBN, amountAfterArbitrageBN: BigNumber;
       if (strategy.sellDex === Dex.UNISWAP) {
-        token2AmountBN = await this.tradeOnUni(strategy.sellToken.address, strategy.buyToken.address, amountWeWantToSellBN);
-        amountAfterArbitrageBN = await this.tradeOnSushi(strategy.buyToken.address, strategy.sellToken.address, token2AmountBN);
+        token2AmountBN = await this.tradeOnUni(strategy.sellToken, strategy.buyToken, amountWeWantToSellBN);
+        amountAfterArbitrageBN = await this.tradeOnSushi(strategy.buyToken, strategy.sellToken, token2AmountBN);
       } else {
-        token2AmountBN = await this.tradeOnSushi(strategy.sellToken.address, strategy.buyToken.address, amountWeWantToSellBN);
-        amountAfterArbitrageBN = await this.tradeOnUni(strategy.buyToken.address, strategy.sellToken.address, token2AmountBN);
+        token2AmountBN = await this.tradeOnSushi(strategy.sellToken, strategy.buyToken, amountWeWantToSellBN);
+        amountAfterArbitrageBN = await this.tradeOnUni(strategy.buyToken, strategy.sellToken, token2AmountBN);
       }
 
       let profit = amountAfterArbitrageBN.sub(amountWeWantToSellBN);
@@ -100,19 +90,24 @@ export class DetermineProfitability {
     return profitability;
   }
 
-  private async tradeOnUni(sellToken: string, butToken: string, amount: BigNumber): Promise<BigNumber> {
-    return await this.contracts.uniQuoter.callStatic.quoteExactInputSingle(
-      sellToken,
-      butToken,
+  private async tradeOnUni(sellToken: Token, buyToken: Token, amount: BigNumber): Promise<BigNumber> {
+    return this.applySlippage(await this.contracts.uniQuoter.callStatic.quoteExactInputSingle(
+      sellToken.address,
+      buyToken.address,
       UNISWAP_POOL_FEE_TIER,
       amount.toString(),
       0
+    ), buyToken.decimals);
+  }
+
+  private async tradeOnSushi(sellToken: Token, buyToken: Token, amount: BigNumber): Promise<BigNumber> {
+    return this.applySlippage((await this.contracts.sushiRouter.getAmountsOut(amount.toString(), [sellToken.address, buyToken.address]))[1], buyToken.decimals
     );
   }
 
-  private async tradeOnSushi(sellToken: string, buyToken: string, amount: BigNumber): Promise<BigNumber> {
-    return (await this.contracts.sushiRouter.getAmountsOut(amount.toString(), [sellToken, buyToken]))[1];
-
+  private applySlippage(num: BigNumber, decimals: number): BigNumber {
+    let withSlippage = parseFloat(ethers.utils.formatUnits(num, decimals)) * SLIPPAGE;
+    return ethers.utils.parseUnits(withSlippage.toString(), decimals);
   }
 }
 

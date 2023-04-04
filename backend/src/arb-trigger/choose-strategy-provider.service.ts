@@ -1,5 +1,13 @@
 import {Injectable} from '@nestjs/common';
-import {ARBITRAGE_CONTRACT_ADDRESS, Dex, PRICE_DIFF_PERCENTAGE, TOKEN_LOAN, TOKEN_PAIR, TOKEN_STAKING} from "../config";
+import {
+  ARBITRAGE_CONTRACT_ADDRESS,
+  Dex,
+  PRICE_DIFF_PERCENTAGE,
+  SLIPPAGE,
+  TOKEN_LOAN,
+  TOKEN_PAIR,
+  TOKEN_STAKING
+} from "../config";
 import {JSBI} from "@uniswap/sdk";
 import {BigNumber, ethers} from "ethers";
 import {ContractsProviderService} from "../contracts-provider/contracts-provider.service";
@@ -54,6 +62,7 @@ export class ChooseStrategy {
       "Max sell amount": ethers.utils.formatUnits(strategy.maxSellAmount, strategy.sellToken.decimals),
       "Buy token": strategy.buyToken.symbol,
       "Rebuy at Dex": Dex[strategy.buyDex],
+      "Slippage": ((1 - SLIPPAGE) * 100).toFixed(2) + "%",
     });
 
     if(maxSellAmount <= 0) {
