@@ -5,3 +5,13 @@ export interface Arbitrage {
   totalProfits: string; // historical total profits
 
 }
+
+export interface ArbitrageTx {
+  hash: string;
+  pool0: number;
+  pool1: number;
+  used: string;
+  profits: string;
+  date: Date;
+
+}

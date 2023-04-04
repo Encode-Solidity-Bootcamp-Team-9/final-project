@@ -14,6 +14,7 @@ import {DetermineProfitability} from "./arb-trigger/profitability-provider.servi
 import {StrategyExecution} from "./arb-trigger/execution-provider.service";
 import {Results} from "./arb-trigger/results-provider.service";
 import {ArbTriggerController} from "./arb-trigger/arb-trigger.controller";
+import { DbModule } from './db/db.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -23,7 +24,7 @@ import {ArbTriggerController} from "./arb-trigger/arb-trigger.controller";
       WALLET_PRIVATE_KEY: Joi.string().required(),
       ALCHEMY_API_KEY: Joi.string().required()
     }),
-  })],
+  }), DbModule],
   controllers: [AppController, ArbTriggerController, InfoController],
   providers: [AppService, InfoService, ChainProviderService, ArbTriggerService, ContractsProviderService, PriceCalculation, ChooseStrategy, DetermineProfitability, StrategyExecution, Results],
 })

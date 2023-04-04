@@ -1,26 +1,15 @@
 import {Injectable} from '@nestjs/common';
-import {
-  ARBITRAGE_CONTRACT_ADDRESS,
-  Dex,
-  MAX_GAS_COST_IN_ETH,
-  PRICE_DIFF_PERCENTAGE,
-  TOKEN_LOAN,
-  TOKEN_PAIR,
-  TOKEN_STAKING, UNISWAP_POOL_FEE_TIER
-} from "../config";
-import {JSBI} from "@uniswap/sdk";
-import {BigNumber, ethers} from "ethers";
+import {Dex} from "../config";
+import {ethers} from "ethers";
 import {ContractsProviderService} from "../contracts-provider/contracts-provider.service";
-import {IPriceRatio} from "./price-calculation-provider.service";
-import {Token} from "@uniswap/sdk-core";
 import {IStrategy} from "./choose-strategy-provider.service";
-import {ChainProviderService} from "../chain-provider/chain-provider.service";
 
 @Injectable()
 export class StrategyExecution {
 
   constructor(
     private readonly contracts: ContractsProviderService,
+
   ) {
   }
 

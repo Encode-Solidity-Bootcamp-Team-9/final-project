@@ -3,9 +3,9 @@ import {ConfigService} from '@nestjs/config';
 import {ethers, Signer} from 'ethers';
 import {CHAIN_ID} from "../config";
 
-
 @Injectable()
 export class ChainProviderService {
+
   private readonly provider: ethers.providers.AlchemyProvider;
   private readonly signer: Signer;
 
@@ -26,4 +26,5 @@ export class ChainProviderService {
   getSigner(): Signer {
     return this.signer;
   }
+
 }

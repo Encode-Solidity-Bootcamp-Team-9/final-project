@@ -58,16 +58,14 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Support
+## Start local database
+Local database is started with docker image. The database is created with the schema and seed data.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Make sure that credentials in start-db.sh match those in your .env file.
+```bash
+# start postgres docker image
+$ ./local/start-db.sh
 
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+# run script for schema creation and seed data
+$ ./local/sync-db.sh
+```

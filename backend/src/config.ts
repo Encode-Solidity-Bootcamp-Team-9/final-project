@@ -44,3 +44,6 @@ export const TOKEN_PAIR = [TOKEN_STAKING, TOKEN_LOAN].sort((a, b) => BigInt(a.ad
 export const MAX_GAS_COST_IN_ETH = "0.0001"; //how much gas price we are willing to pay
 export const PRICE_DIFF_PERCENTAGE = 0.5; // = 0.5% how much price difference triggers the arbitrage process
 // (it can still not be executed if additional calculations show that it is not profitable)
+
+export const PG_CONNECTION = 'PG_CONNECTION';
+

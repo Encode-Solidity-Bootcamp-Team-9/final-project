@@ -1,22 +1,20 @@
-import {Injectable} from '@nestjs/common';
-import {ConfigService} from "@nestjs/config";
+import {Inject, Injectable} from '@nestjs/common';
 import {ChainProviderService} from "../chain-provider/chain-provider.service";
 import {ContractsProviderService} from "../contracts-provider/contracts-provider.service";
 import {PriceCalculation} from "../arb-trigger/price-calculation-provider.service";
-import {ChooseStrategy} from "../arb-trigger/choose-strategy-provider.service";
-import {DetermineProfitability} from "../arb-trigger/profitability-provider.service";
-import {StrategyExecution} from "../arb-trigger/execution-provider.service";
-import {Results} from "../arb-trigger/results-provider.service";
 import {UserInfo} from "./dtos/UserInfo";
-import {Arbitrage} from "./dtos/Arbitrage";
+import {Arbitrage, ArbitrageTx} from "./dtos/Arbitrage";
 import {PoolsState} from "./dtos/Pools";
+import {PG_CONNECTION} from "../config";
 
 @Injectable()
 export class InfoService {
 
   constructor(
     private readonly contracts: ContractsProviderService,
-    private readonly priceCalculation: PriceCalculation
+    private readonly priceCalculation: PriceCalculation,
+    private readonly chain: ChainProviderService,
+    @Inject(PG_CONNECTION) private conn: any
   ) {
   }
 
@@ -37,6 +35,22 @@ export class InfoService {
       totalStaked: (await this.contracts.arbitrageContract.totalStaked()).toString(),
       totalProfits: (await this.contracts.arbitrageContract.totalProfits()).toString()
     };
+  }
+
+  async getArbitrageTxs() : Promise<ArbitrageTx[]> {
+    const data = await this.conn.query('SELECT * FROM "arbitragetxs" ORDER BY "createdat" DESC;');
+    const txs : ArbitrageTx[] = [];
+    data.rows.forEach((tx) => {
+      txs.push({
+        hash: tx.hash,
+        pool0: tx.pool0,
+        pool1: tx.pool1,
+        used: tx.used,
+        profits: tx.profits,
+        date: tx.createdat,
+      })
+    });
+   return txs;
   }
 
   async getPoolsInfo(): Promise<PoolsState> {
