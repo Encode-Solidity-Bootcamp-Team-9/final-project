@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { argv } from "node:process";
 import * as dotenv from "dotenv";
-import { MiddleMan__factory } from "../typechain-types";
+import { MiddleMan__factory, SimpleSwap__factory } from "../typechain-types";
 
 // For macOS users
 import path from "path";
