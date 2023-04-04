@@ -13,17 +13,17 @@ export class PriceCalculation {
   }
 
   async checkPrices() {
-    const uniPoolRatio: PriceRatio = await this.getUniPoolRatio();
+    const uniPoolRatio: IPriceRatio = await this.getUniPoolRatio();
     console.log("[UNI] " + TOKEN_STAKING.symbol + "/" + TOKEN_LOAN.symbol + " : " + uniPoolRatio.ratio);
 
-    const sushiPoolRatio: PriceRatio = await this.getSushiPoolRatio();
+    const sushiPoolRatio: IPriceRatio = await this.getSushiPoolRatio();
     console.log("[SUSHI] " + TOKEN_STAKING.symbol + "/" + TOKEN_LOAN.symbol + " : " + sushiPoolRatio.ratio);
 
     console.log("\n");
     return {uniPoolRatio, sushiPoolRatio};
   }
 
-  priceDiff(uniPoolRatio: PriceRatio, sushiPoolRatio: PriceRatio) {
+  priceDiff(uniPoolRatio: IPriceRatio, sushiPoolRatio: IPriceRatio) {
     const uniVsSushiDiffPercentage = (((uniPoolRatio.ratio - sushiPoolRatio.ratio) / sushiPoolRatio.ratio) * 100);
 
     const minDiffPercentage = PRICE_DIFF_PERCENTAGE;
@@ -32,7 +32,7 @@ export class PriceCalculation {
     return {uniVsSushiDiffPercentage, isDiffOk};
   }
 
-  private async getUniPoolRatio(): Promise<PriceRatio> {
+  private async getUniPoolRatio(): Promise<IPriceRatio> {
     const [slot0] =
       await Promise.all([
         this.contracts.uniPool.slot0(),
@@ -47,7 +47,7 @@ export class PriceCalculation {
     });
   }
 
-  private async getPriceRatioUni(PoolInfo): Promise<PriceRatio> {
+  private async getPriceRatioUni(PoolInfo): Promise<IPriceRatio> {
     let sqrtPriceX96: any = PoolInfo.SqrtX96;
     let Decimal0: any = PoolInfo.Decimal0
     let Decimal1: any = PoolInfo.Decimal1;
@@ -70,7 +70,7 @@ export class PriceCalculation {
     }
   }
 
-  private async getSushiPoolRatio(): Promise<PriceRatio> {
+  private async getSushiPoolRatio(): Promise<IPriceRatio> {
     const sushiPool = await this.contracts.getSushiPool()
     let [reserveToken0, reserveToken1] = await sushiPool.getReserves();
 
@@ -94,7 +94,7 @@ export class PriceCalculation {
 
 }
 
-export interface PriceRatio {
+export interface IPriceRatio {
   ratio: number,
   liquidityStakingToken: BigNumber,
   liquidityLoanToken: BigNumber,
