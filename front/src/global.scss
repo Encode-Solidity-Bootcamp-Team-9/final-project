@@ -118,3 +118,24 @@ ion-accordion {
   display: flex;
   justify-content: center;
 }
+
+ion-card {
+  --background: var(--ion-background-color-lighter);
+  --color: var(--ion-color-white);
+  ion-card-title {
+    text-align: center;
+    --color: var(--ion-color-white);
+    font-size: 16px;
+  }
+  ion-card-content {
+    text-align: center;
+  }
+}
+
+.chart {
+  flex: 1;
+  .chart-container {
+    min-width: 300px;
+    min-height: 300px;
+  }
+}

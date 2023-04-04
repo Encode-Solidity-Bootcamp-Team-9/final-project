@@ -6,6 +6,7 @@ import { IonicModule, Platform } from '@ionic/angular';
 import { filter, Subscription } from 'rxjs';
 import { ToastController } from '@ionic/angular';
 import { NotificationService } from './services/notification.service';
+import { Web3Service } from './services/web3.service';
 
 @Component({
   selector: 'app-root',
@@ -46,12 +47,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       icon: 'cash',
       active: false,
     },
-    {
-      title: 'Lottery',
-      url: 'lottery',
-      icon: 'gift',
-      active: false,
-    },
+    // {
+    //   title: 'Lottery',
+    //   url: 'lottery',
+    //   icon: 'gift',
+    //   active: false,
+    // },
   ];
 
   smallSideMenu: boolean = false;
@@ -62,7 +63,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     private plateform: Platform,
     private router: Router,
     private notificationService: NotificationService,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private web3: Web3Service
   ) {
     this.subs.push(
       this.router.events
@@ -86,6 +88,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
           duration: 3000,
         });
         await toast.present();
+      })
+    );
+
+    this.subs.push(
+      this.web3.address$.subscribe((address) => {
+        this.account = address;
       })
     );
   }
@@ -122,6 +130,10 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   goToLink(url: string) {
     window.open(url, '_blank');
+  }
+
+  public async connect() {
+    await this.web3.connect();
   }
 
   ngOnDestroy(): void {

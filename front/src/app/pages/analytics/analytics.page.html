@@ -2,41 +2,96 @@
   <div class="container">
     <ion-accordion-group [multiple]="true" [value]="openState">
       <!-- Summary -->
-      <ion-accordion value="summary" toggleIconSlot="start">
+      <ion-accordion value="overview" toggleIconSlot="start">
         <ion-item slot="header">
-          <div class="timeline-step">
-            <div class="hexagon"><div>0</div></div>
-          </div>
-          <ion-label>Summary</ion-label>
+          <ion-label>Overview</ion-label>
         </ion-item>
         <div class="ion-padding" slot="content">
-          <p>
-            In order to invest in Team 9 arbitrage, you need to stake
-            <em>NAS</em>. You can get <em>NAS</em> buy swapping
-            <em>FETH</em> (FakeETH).
-          </p>
-          <p>
-            We offer new investors a free amount of <em>FETH</em> (step 1: Mint
-            FETH). After minting you can swap your <em>FETH</em> for some
-            <em>NAS</em>.
-          </p>
-          <p>
-            You can then stake your <em>NAS</em> for a share of the profits.
-          </p>
+          <div class="overview">
+            <ion-card class="chart">
+              <ion-card-header>
+                <ion-card-title>TVL vs Fees Generated</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <div
+                  echarts
+                  [options]="totalProfits"
+                  class="chart-container"
+                ></div>
+              </ion-card-content>
+            </ion-card>
+            <ion-card class="chart">
+              <ion-card-header>
+                <ion-card-title>Uniswap Pool Balance</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <div
+                  echarts
+                  [options]="totalProfits"
+                  class="chart-container"
+                ></div>
+              </ion-card-content>
+            </ion-card>
+            <ion-card class="chart">
+              <ion-card-header>
+                <ion-card-title>Sushiswap Pool Balance</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <div
+                  echarts
+                  [options]="totalProfits"
+                  class="chart-container"
+                ></div>
+              </ion-card-content>
+            </ion-card>
+          </div>
         </div>
       </ion-accordion>
 
-      <!-- Summary -->
-      <ion-accordion value="overview" toggleIconSlot="start">
+      <ion-accordion value="history" toggleIconSlot="start">
         <ion-item slot="header">
-          <div class="timeline-step">
-            <div class="hexagon"><div>0</div></div>
-          </div>
-          <ion-label>How to invest</ion-label>
+          <ion-label>Arbitrage Transaction History</ion-label>
         </ion-item>
         <div class="ion-padding" slot="content">
-          <div class="image">
-            <img src="assets/solution.png" />
+          <div class="history">
+            <div class="history-item" *ngFor="let item of history">
+              <ion-card class="chart">
+                <ion-card-header>
+                  <ion-card-title>{{ item.hash }}</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <div class="history-item-content">
+                    <!-- <div
+                      echarts
+                      [options]="totalProfits"
+                      class="chart-container"
+                    ></div> -->
+                    <div class="stats">
+                      <div>
+                        <div class="title">Date:</div>
+                        <div class="value">{{ item.date.toISOString() }}</div>
+                      </div>
+                      <div>
+                        <div class="title">Funds used:</div>
+                        <div class="value">{{ item.used }} <em>NAS</em></div>
+                      </div>
+                      <div>
+                        <div class="title">Fees generated:</div>
+                        <div class="value">{{ item.fees }} <em>NAS</em></div>
+                      </div>
+                      <div>
+                        <div class="title">Bought from:</div>
+                        <div class="value"><em>{{ item.pool0 }}</em></div>
+                      </div>
+                      <div>
+                        <div class="title">Sold to:</div>
+                        <div class="value"><em>{{ item.pool1 }}</em></div>
+                      </div>
+                    </div>
+                  </div>
+                </ion-card-content>
+              </ion-card>
+            </div>
           </div>
         </div>
       </ion-accordion>

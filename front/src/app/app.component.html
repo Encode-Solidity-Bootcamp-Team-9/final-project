@@ -7,11 +7,11 @@
             <ion-icon name="menu-sharp" slot="icon-only"></ion-icon>
           </ion-button>
           <div class="infos">
-            <ion-button *ngIf="!account">
+            <ion-button *ngIf="!account" (click)="connect()">
               <ion-icon name="wallet" slot="start"></ion-icon>
               <ion-label *ngIf="!smallSideMenu">Connect Wallet</ion-label>
             </ion-button>
-            <ion-button *ngIf="account">
+            <ion-button *ngIf="account" class="wallet-button">
               <ion-icon name="wallet" slot="start"></ion-icon>
               <ion-label *ngIf="!smallSideMenu">{{ account }}</ion-label>
             </ion-button>
