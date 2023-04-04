@@ -1,7 +1,7 @@
 import {Injectable} from '@nestjs/common';
 import {ConfigService} from '@nestjs/config';
 import {ethers, Signer} from 'ethers';
-import {CHAIN_ID} from "./config";
+import {CHAIN_ID} from "../config";
 
 
 @Injectable()

@@ -21,7 +21,7 @@ export const SUSHISWAP_FACTORY_ADDRESS = '0xc35DADB65012eC5796536bD9864eD8773aBc
 export const SUSHISWAP_SWAP_ROUTER_ADDRESS = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
 
 // ARBITRAGE CONTRACTS
-export const ARBITRAGE_CONTRACT_ADDRESS = '0x90aa731eea0c9cbb2299b2ceb6674c5f54dfebb0';
+export const ARBITRAGE_CONTRACT_ADDRESS = '0x180b30Cca80073E5a2807CA3343dB96A2C0A6995';
 export const ARBITRAGE_CONTRACT_ABI = [
   'function performArbitrage(uint8 _sellAt, address _tokenToSell, address _tokenToBuy, uint256 _amount) external',
   'function totalProfits() view returns (uint256)',

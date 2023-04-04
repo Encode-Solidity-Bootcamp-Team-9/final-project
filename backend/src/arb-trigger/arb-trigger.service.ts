@@ -1,130 +1,40 @@
 import {Injectable} from '@nestjs/common';
 import {ConfigService} from "@nestjs/config";
-import {ChainProviderService} from "./chain-provider.service";
-import * as IUniswapV3Factory
-  from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Factory.sol/IUniswapV3Factory.json'
-import * as IUniswapV3Pool from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json'
-import * as ISushiswapV2Factory from "@uniswap/v2-core/build/IUniswapV2Factory.json"
-import * as ISushiswapV2Pair from "@uniswap/v2-core/build/IUniswapV2Pair.json"
-import * as IUniswapV2Router02 from "@uniswap/v2-periphery/build/IUniswapV2Router02.json";
-import * as IERC20 from "@uniswap/v2-core/build/IERC20.json"
-import * as Quoter from '@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Quoter.json'
 
 import {BigNumber, Contract, ethers} from "ethers";
-import {computePoolAddress} from "@uniswap/v3-sdk";
 import {
-  ARBITRAGE_CONTRACT_ABI,
   ARBITRAGE_CONTRACT_ADDRESS,
-  Dex, MAX_GAS_COST_IN_ETH,
-  SUSHISWAP_FACTORY_ADDRESS, SUSHISWAP_SWAP_ROUTER_ADDRESS,
+  Dex,
+  MAX_GAS_COST_IN_ETH,
+  PRICE_DIFF_PERCENTAGE,
   TOKEN_LOAN,
   TOKEN_PAIR,
   TOKEN_STAKING,
-  UNISWAP_FACTORY_ADDRESS,
-  UNISWAP_POOL_FEE_TIER, UNISWAP_QUOTER_ADDRESS
-} from "./config";
+  UNISWAP_POOL_FEE_TIER
+} from "../config";
 import {JSBI} from "@uniswap/sdk";
 import {Token} from "@uniswap/sdk-core";
-import {util} from "prettier";
-import getMaxContinuousCount = util.getMaxContinuousCount;
-import {PRICE_DIFF_PERCENTAGE} from "./config";
+import {ChainProviderService} from "../chain-provider/chain-provider.service";
+import {ContractsProviderService} from "../contracts-provider/contracts-provider.service";
 
 @Injectable()
 export class ArbTriggerService {
-
-  private uniPool: Contract;
-  private uniFactory: Contract
-  private uniQuoter: Contract
-
-  private sushiPool: Contract;
-  private sushiFactory: Contract;
-
-  private sushiRouter: Contract;
-
-  private stakeToken: Contract;
-  private loanToken: Contract;
-
-  private arbitrageContract: Contract;
-
   private arbitrageInProgress: boolean = false;
+  private sushiPool : Contract;
 
   constructor(
-    private readonly configService: ConfigService,
-    private readonly chainProviderService: ChainProviderService,
+    private readonly config: ConfigService,
+    private readonly chain: ChainProviderService,
+    private readonly contracts: ContractsProviderService,
   ) {
-
-    this.arbitrageContract = new ethers.Contract(
-      ARBITRAGE_CONTRACT_ADDRESS,
-      ARBITRAGE_CONTRACT_ABI,
-      this.chainProviderService.getSigner(),
-    );
-
-    this.stakeToken = new ethers.Contract(
-      TOKEN_STAKING.address,
-      IERC20.abi,
-      this.chainProviderService.getProvider(),
-    );
-
-    this.loanToken = new ethers.Contract(
-      TOKEN_LOAN.address,
-      IERC20.abi,
-      this.chainProviderService.getProvider(),
-    );
-
-    this.uniFactory = new ethers.Contract(
-      UNISWAP_FACTORY_ADDRESS,
-      IUniswapV3Factory.abi,
-      this.chainProviderService.getProvider(),
-    );
-
-    this.uniQuoter = new ethers.Contract(
-      UNISWAP_QUOTER_ADDRESS,
-      Quoter.abi,
-      this.chainProviderService.getProvider(),
-    );
-
-    this.sushiFactory = new ethers.Contract(
-      SUSHISWAP_FACTORY_ADDRESS,
-      ISushiswapV2Factory.abi,
-      this.chainProviderService.getProvider(),
-    );
-
-    this.sushiRouter = new ethers.Contract(
-      SUSHISWAP_SWAP_ROUTER_ADDRESS,
-      IUniswapV2Router02.abi,
-      this.chainProviderService.getProvider(),
-    );
-
-    const uniPoolAddress = computePoolAddress({
-      factoryAddress: UNISWAP_FACTORY_ADDRESS,
-      tokenA: TOKEN_PAIR[0],
-      tokenB: TOKEN_PAIR[1],
-      fee: UNISWAP_POOL_FEE_TIER,
-    })
-
-    console.log(`Uni pool address (Token 1: ${TOKEN_PAIR[0].symbol} Token 2: ${TOKEN_PAIR[1].symbol} fee: ${UNISWAP_POOL_FEE_TIER}): ${uniPoolAddress}`);
-
-    this.uniPool = new ethers.Contract(
-      uniPoolAddress,
-      IUniswapV3Pool.abi,
-      this.chainProviderService.getProvider(),
-    );
-
-    this.sushiFactory.getPair(TOKEN_PAIR[0].address, TOKEN_PAIR[1].address).then((sushiPoolAddress) => {
-      console.log(`Sushi pool address (Token 1: ${TOKEN_PAIR[0].symbol} Token 2: ${TOKEN_PAIR[1].symbol}): ${sushiPoolAddress}`);
-      this.sushiPool = new ethers.Contract(
-        sushiPoolAddress,
-        ISushiswapV2Pair.abi,
-        this.chainProviderService.getProvider(),
-      );
-
-      this.initializeEventListeners();
-    });
+    this.initializeEventListeners();
   }
 
   private async initializeEventListeners() {
 
-    this.uniPool.on('Swap', async () => {
+    this.sushiPool = await this.contracts.getSushiPool();
+
+    this.contracts.uniPool.on('Swap', async () => {
       console.log("Swap event on Uni pool")
       await this.arbitrage(Dex.UNISWAP);
     });
@@ -213,7 +123,7 @@ export class ArbTriggerService {
   private async getUniPoolRatio(): Promise<PriceRatio> {
     const [slot0] =
       await Promise.all([
-        this.uniPool.slot0(),
+        this.contracts.uniPool.slot0(),
       ]);
 
     const sqrtPriceX96 = slot0[0];
@@ -233,8 +143,8 @@ export class ArbTriggerService {
     // @ts-ignore
     let buyOneOfToken0 = (sqrtPriceX96 * sqrtPriceX96 * (10 ** Decimal0) / (10 ** Decimal1) / (JSBI.BigInt(2) ** (JSBI.BigInt(192))).toFixed(Decimal1));
 
-    let liquidityStakingToken = await this.stakeToken.balanceOf(this.uniPool.address);
-    let liquidityLoanToken = await this.loanToken.balanceOf(this.uniPool.address);
+    let liquidityStakingToken = await this.contracts.stakeToken.balanceOf(this.contracts.uniPool.address);
+    let liquidityLoanToken = await this.contracts.loanToken.balanceOf(this.contracts.uniPool.address);
 
     //always return price ratio for pair TOKEN_STAKING/TOKEN_LOAN !
     if (BigInt(TOKEN_STAKING.address) > BigInt(TOKEN_LOAN.address)) {
@@ -269,7 +179,7 @@ export class ArbTriggerService {
 
   }
 
-  private async chooseStrategy(uniPoolRatio : PriceRatio, sushiPoolRatio : PriceRatio, uniVsSushiDiffPercentage: number): Promise<Strategy> {
+  private async chooseStrategy(uniPoolRatio: PriceRatio, sushiPoolRatio: PriceRatio, uniVsSushiDiffPercentage: number): Promise<Strategy> {
 
     let sellDex, buyDex;
     let liquidity;
@@ -285,7 +195,7 @@ export class ArbTriggerService {
     }
 
     // totalStaked: await this.arbitrageContract.totalStaked(), todo: when arbitrage contract is ready
-    let totalStaked : BigNumber = await this.stakeToken.balanceOf(ARBITRAGE_CONTRACT_ADDRESS);
+    let totalStaked: BigNumber = await this.contracts.stakeToken.balanceOf(ARBITRAGE_CONTRACT_ADDRESS);
 
     //max sell amount is limited by total liquidity in the selling pool and divided by 10
     let maxSellAmountStr = ethers.utils.formatUnits(totalStaked.gt(liquidity) ? liquidity : totalStaked, TOKEN_STAKING.decimals);
@@ -299,7 +209,7 @@ export class ArbTriggerService {
       sellDex: sellDex, //here we have to sell TOKEN_STAKING for TOKEN_LOAN
       totalStaked: totalStaked,
       maxSellAmount: ethers.utils.parseUnits(maxSellAmount.toString(), TOKEN_STAKING.decimals),
-      currentProfit: await this.stakeToken.balanceOf(ARBITRAGE_CONTRACT_ADDRESS),
+      currentProfit: await this.contracts.stakeToken.balanceOf(ARBITRAGE_CONTRACT_ADDRESS),
       // currentProfit: await this.arbitrageContract.totalProfits(), todo: when arbitrage contract is ready
     };
 
@@ -314,7 +224,6 @@ export class ArbTriggerService {
 
     return strategy;
   }
-
 
 
   private async calculateProfitability(strategy: Strategy): Promise<Profitability> {
@@ -346,7 +255,7 @@ export class ArbTriggerService {
 
       // console.log("Profit: " + ethers.utils.formatUnits(profit, TOKEN_STAKING.decimals) + " " + TOKEN_STAKING.symbol);
 
-      console.log(i + ": Profit " + ethers.utils.formatUnits(profit, strategy.sellToken.decimals) + " " + strategy.sellToken.symbol + " (Trade amount: "+ amount + ")" );
+      console.log(i + ": Profit " + ethers.utils.formatUnits(profit, strategy.sellToken.decimals) + " " + strategy.sellToken.symbol + " (Trade amount: " + amount + ")");
       if (mostProfit == null || profit.gt(mostProfit)) {
         mostProfit = profit;
         amountWithMostProfit = amount;
@@ -355,8 +264,8 @@ export class ArbTriggerService {
       }
     }
 
-    const gasPrice = await this.chainProviderService.getProvider().getGasPrice();
-    const gasFeesTx = await this.arbitrageContract.estimateGas.performArbitrage(strategy.buyDex, strategy.sellToken.address, strategy.buyToken.address, ethers.utils.parseUnits(amountWithMostProfit.toString(), strategy.sellToken.decimals));
+    const gasPrice = await this.chain.getProvider().getGasPrice();
+    const gasFeesTx = await this.contracts.arbitrageContract.estimateGas.performArbitrage(strategy.buyDex, strategy.sellToken.address, strategy.buyToken.address, ethers.utils.parseUnits(amountWithMostProfit.toString(), strategy.sellToken.decimals));
     const gasCost = gasFeesTx.mul(gasPrice);
 
     strategy.amountWithMostProfit = ethers.utils.parseUnits(amountWithMostProfit.toString(), strategy.sellToken.decimals);
@@ -389,7 +298,7 @@ export class ArbTriggerService {
   }
 
   private async tradeOnUni(sellToken: string, butToken: string, amount: BigNumber): Promise<BigNumber> {
-    return await this.uniQuoter.callStatic.quoteExactInputSingle(
+    return await this.contracts.uniQuoter.callStatic.quoteExactInputSingle(
       sellToken,
       butToken,
       UNISWAP_POOL_FEE_TIER,
@@ -399,13 +308,13 @@ export class ArbTriggerService {
   }
 
   private async tradeOnSushi(sellToken: string, buyToken: string, amount: BigNumber): Promise<BigNumber> {
-    return (await this.sushiRouter.getAmountsOut(amount.toString(), [sellToken, buyToken]))[1];
+    return (await this.contracts.sushiRouter.getAmountsOut(amount.toString(), [sellToken, buyToken]))[1];
 
   }
 
   private async executeStrategy(strategy: Strategy): Promise<Execution> {
     console.log("Parameters: " + Dex[strategy.sellDex] + ", " + strategy.sellToken.symbol + ", " + strategy.buyToken.symbol + ", " + ethers.utils.formatUnits(strategy.amountWithMostProfit, strategy.sellToken.decimals));
-    const tx = await this.arbitrageContract.performArbitrage(strategy.sellDex, strategy.sellToken.address, strategy.buyToken.address, strategy.amountWithMostProfit);
+    const tx = await this.contracts.arbitrageContract.performArbitrage(strategy.sellDex, strategy.sellToken.address, strategy.buyToken.address, strategy.amountWithMostProfit);
     const txReceipt = await tx.wait();
     console.log("Arbitrage executed!");
     return {
@@ -414,7 +323,7 @@ export class ArbTriggerService {
   }
 
   private async checkResults(strategy: Strategy, execution: Execution, profitability: Profitability): Promise<void> {
-    const totalProfits = await this.arbitrageContract.totalProfits();
+    const totalProfits = await this.contracts.arbitrageContract.totalProfits();
 
     console.table({
       "Tx hash": execution.txReceipt.transactionHash,

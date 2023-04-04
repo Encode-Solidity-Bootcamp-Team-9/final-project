@@ -3,6 +3,8 @@ import {AppController} from './app.controller';
 import {AppService} from './app.service';
 import {ArbTriggerModule} from './arb-trigger/arb-trigger.module';
 import {ConfigModule} from "@nestjs/config";
+import { ContractsProviderService } from './contracts-provider/contracts-provider.service';
+import { ChainProviderService } from './chain-provider/chain-provider.service';
 import * as Joi from 'joi';
 
 @Module({

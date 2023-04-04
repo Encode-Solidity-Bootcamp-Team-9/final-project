@@ -1,6 +1,6 @@
 import {Controller, Post} from '@nestjs/common';
 import {ArbTriggerService} from "./arb-trigger.service";
-import {Dex} from "./config";
+import {Dex} from "../config";
 
 @Controller('arb-trigger')
 export class ArbTriggerController {
