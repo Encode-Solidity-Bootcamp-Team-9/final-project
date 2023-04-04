@@ -20,10 +20,7 @@ export class Results {
     let arbitrageProfit = totalProfits.sub(strategy.currentProfit);
 
 
-    await this.conn.query(
-      `INSERT INTO "arbitragetxs" ("hash", "pool0", "pool1", "used", "profits", "createdat")
-       VALUES ($1, $2, $3, $4, $5,
-               $6)`, [execution.txReceipt.transactionHash, strategy.sellDex, strategy.buyDex, strategy.firstTrade0.toString(), arbitrageProfit.toString(), new Date()]); // sends queries
+    await this.insertTx(execution, strategy, arbitrageProfit);
 
     console.table({
       "Tx hash": execution.txReceipt.transactionHash,
@@ -36,6 +33,13 @@ export class Results {
       "Estimated profit": ethers.utils.formatUnits(profitability.profit, TOKEN_STAKING.decimals) + " " + TOKEN_STAKING.symbol,
     });
     return;
+  }
+
+  private async insertTx(execution: IExecution, strategy: IStrategy, arbitrageProfit) {
+    await this.conn.query(
+      `INSERT INTO "arbitragetxs" ("hash", "pool0", "pool1", "used", "profits", "createdat")
+       VALUES ($1, $2, $3, $4, $5,
+               $6)`, [execution.txReceipt.transactionHash, strategy.sellDex, strategy.buyDex, strategy.firstTrade0.toString(), arbitrageProfit.toString(), new Date()]); // sends queries
   }
 }
 
