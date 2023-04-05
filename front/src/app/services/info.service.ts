@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ethers } from 'ethers';
 import { Subject } from 'rxjs';
-import { Arbitrage } from '../models/arbitrage-tx';
+import { Arbitrage, ArbitrageTx } from '../models/arbitrage-tx';
 import { PoolsState } from '../models/pool';
 import { UserInfo } from '../models/user';
 import { ApiService } from './api.service';
@@ -50,5 +50,12 @@ export class InfoService {
       this.refresh.next();
       return undefined;
     }
+  }
+
+  public async getHistory(): Promise<ArbitrageTx[]> {
+    const data = await this.api.get<ArbitrageTx[]>(
+      'info/arbitrage-transactions'
+    );
+    return data;
   }
 }

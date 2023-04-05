@@ -77,24 +77,7 @@ export class AnalyticsPage implements OnInit {
     return this.infoService.poolsState;
   }
 
-  public history: ArbitrageTx[] = [
-    {
-      hash: '0x3ee733310f8ee29320e55e0ebbf80e8961641242c65cb06b8bdfbdff84fa95b8',
-      pool0: 1,
-      pool1: 0,
-      used: '1000',
-      profits: '3.2',
-      date: new Date(),
-    },
-    {
-      hash: '0x3ee733310f8ee29320e55e0ebbf80e8961641242c65cb06b8bdfbdff84fa95b8',
-      pool0: 0,
-      pool1: 1,
-      used: '500',
-      profits: '1.2',
-      date: new Date(),
-    },
-  ];
+  public history: ArbitrageTx[] = [];
 
   constructor(private infoService: InfoService) {}
 
@@ -113,8 +96,15 @@ export class AnalyticsPage implements OnInit {
       this.infoService.refresh.subscribe(() => {
         this.updateArbitrage();
         this.updatePools();
+        this.updateHistory();
       })
     );
+
+    this.updateHistory();
+  }
+
+  private async updateHistory() {
+    // this.history = await this.infoService.getHistory();
   }
 
   private updateArbitrage() {
