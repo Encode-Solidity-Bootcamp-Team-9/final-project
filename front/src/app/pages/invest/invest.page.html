@@ -93,9 +93,11 @@
                 <ion-card-title><em>NAS</em> Balance</ion-card-title>
               </ion-card-header>
               <ion-card-content>
-                <div>1000 <em>NAS</em></div>
-                <div class="inputs">
-                  <ion-input label="NAS" placeholder="0"></ion-input>
+                <div *ngIf="userInfo">
+                  <div>{{ userInfo.nas | toETH }} <em>NAS</em></div>
+                  <div class="inputs">
+                    <ion-input label="NAS" placeholder="ENTER AMOUNT"></ion-input>
+                  </div>
                 </div>
                 <ion-button>Stake</ion-button>
               </ion-card-content>
@@ -109,7 +111,8 @@
                 <div *ngIf="userInfo">
                   {{ userInfo.staked | toETH }} <em>NAS</em>
                 </div>
-                <div>Locked untill: 16th Jan 2024</div>
+                <div *ngIf="userInfo">Locked until: {{ userInfo.locktime }}</div>
+                <div>FIX DATE FORMAT</div>
                 <ion-button>Unstake + claim</ion-button>
               </ion-card-content>
             </ion-card>
