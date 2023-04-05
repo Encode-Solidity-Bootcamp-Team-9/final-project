@@ -106,7 +106,7 @@ export class DetermineProfitability {
   }
 
   private applySlippage(num: BigNumber, decimals: number): BigNumber {
-    let withSlippage = parseFloat(ethers.utils.formatUnits(num, decimals)) * SLIPPAGE;
+    let withSlippage = parseFloat(ethers.utils.formatUnits(num, decimals)) * (1-SLIPPAGE);
     return ethers.utils.parseUnits(withSlippage.toString(), decimals);
   }
 }

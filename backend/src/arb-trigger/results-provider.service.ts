@@ -39,7 +39,7 @@ export class Results {
     await this.conn.query(
       `INSERT INTO "arbitragetxs" ("hash", "pool0", "pool1", "used", "profits", "createdat")
        VALUES ($1, $2, $3, $4, $5,
-               $6)`, [execution.txReceipt.transactionHash, strategy.sellDex, strategy.buyDex, strategy.firstTrade0.toString(), arbitrageProfit.toString(), new Date()]); // sends queries
+               $6)`, [execution.txReceipt.transactionHash, strategy.sellDex, strategy.buyDex, strategy.firstTrade0.toString(), arbitrageProfit.toString(), new Date()]);
   }
 }
 

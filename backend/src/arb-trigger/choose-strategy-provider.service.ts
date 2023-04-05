@@ -62,7 +62,7 @@ export class ChooseStrategy {
       "Max sell amount": ethers.utils.formatUnits(strategy.maxSellAmount, strategy.sellToken.decimals),
       "Buy token": strategy.buyToken.symbol,
       "Rebuy at Dex": Dex[strategy.buyDex],
-      "Slippage": ((1 - SLIPPAGE) * 100).toFixed(2) + "%",
+      "Slippage": (( SLIPPAGE) * 100).toFixed(2) + "%",
     });
 
     if(maxSellAmount <= 0) {

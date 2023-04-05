@@ -51,6 +51,6 @@ export const MAX_GAS_COST_IN_ETH = process.env.MAX_GAS_COST_IN_ETH || '0.0001'; 
 export const PRICE_DIFF_PERCENTAGE = 0.5; // = 0.5% how much price difference triggers the arbitrage process
 // (it can still not be executed if additional calculations show that it is not profitable)
 
-export const SLIPPAGE = 1; // 0% slippage
+export const SLIPPAGE = 0; // value between 0 and 1. 0 = no slippage, 1 = 100% slippage, 0.03 = 3% slippage
 
 export const PG_CONNECTION = 'PG_CONNECTION';
