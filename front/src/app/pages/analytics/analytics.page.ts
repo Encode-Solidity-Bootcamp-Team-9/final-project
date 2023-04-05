@@ -6,14 +6,17 @@ import { EChartsOption } from 'echarts';
 import { generatePieOptions } from '../home/utils';
 import { TKN2_SYMBOL } from 'src/app/utils/consts';
 import { NgxEchartsModule, NGX_ECHARTS_CONFIG } from 'ngx-echarts';
-import { ArbitrageTx } from 'src/app/models/arbitrage-tx';
+import { Arbitrage, ArbitrageTx } from 'src/app/models/arbitrage-tx';
+import { InfoService } from 'src/app/services/info.service';
+import { ToETHPipe } from 'src/app/pipes/to-eth.pipe';
+import { PoolsState } from 'src/app/models/pool';
 
 @Component({
   selector: 'app-analytics',
   templateUrl: './analytics.page.html',
   styleUrls: ['./analytics.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule, NgxEchartsModule],
+  imports: [IonicModule, CommonModule, FormsModule, NgxEchartsModule, ToETHPipe],
   providers: [
     {
       provide: NGX_ECHARTS_CONFIG,
@@ -29,7 +32,18 @@ export class AnalyticsPage implements OnInit {
       { value: 10, name: 'Total Profits' },
       {
         value: 1000,
-        name: 'TVL Invested',
+        name: 'TVL Invested', 
+      },
+    ],
+    [TKN2_SYMBOL, TKN2_SYMBOL]
+  );
+
+  public poolBalance: EChartsOption = generatePieOptions(
+    [
+      { value: 300, name: 'NAS' },
+      {
+        value: 50,
+        name: 'FETH', 
       },
     ],
     [TKN2_SYMBOL, TKN2_SYMBOL]
@@ -54,7 +68,20 @@ export class AnalyticsPage implements OnInit {
     },
   ];
 
-  constructor() {}
+  public arbitrage: Arbitrage | undefined;
+  public poolsState: PoolsState | undefined;
 
-  ngOnInit() {}
+  constructor(private infoService: InfoService) {}
+
+  ngOnInit() {
+    //get arbitrage contract data
+    this.infoService.getArbitrageInfo().then((arbitrage) => {
+      this.arbitrage = arbitrage;
+    });
+
+    //get pools data
+    this.infoService.getPoolsInfo().then((pools) => {
+      this.poolsState = pools;
+    });
+  }
 }
