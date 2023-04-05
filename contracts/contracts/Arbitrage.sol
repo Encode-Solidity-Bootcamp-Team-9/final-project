@@ -101,7 +101,7 @@ contract Arbitrage is Ownable {
     /// @param amount Amount of tokens to be staked.
     function stakeToken(uint256 amount) external {
         require(amount > 0, "Stake amount should be more than zero");
-        require(addressInStake[msg.sender] > 0, "You have already staked tokens");
+        require(addressInStake[msg.sender] == 0, "You have already staked tokens");
         require(stakedToken.balanceOf(msg.sender) >= amount, "Insufficient balance");
        
         stakedToken.transferFrom(msg.sender, address(this), amount);
@@ -192,7 +192,7 @@ contract Arbitrage is Ownable {
         uint256 profits = post - pre;
         totalProfits += profits;
         for(uint256 i = 1; i < stakers.length; i++) {
-            StakeInfo memory data = stakeInfos[stakers[i]];
+            StakeInfo storage data = stakeInfos[stakers[i]];
             uint256 currentStake = data.amount - data.withdrawn;
             data.profit += profits * (currentStake / totalStaked);
         }

@@ -143,7 +143,7 @@ export class SwapService {
       : UNISWAP_ROUTER_ADDRESS;
     const approveFeth = await this.web3.FETHContract.connect(this.web3.signer!)[
       'approve'
-    ](router, amount);
+    ](router, amount, { gasLimit: 80000 });
     console.log(approveFeth);
     await approveFeth.wait();
   }

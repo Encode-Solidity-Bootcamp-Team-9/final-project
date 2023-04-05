@@ -97,7 +97,9 @@ export class InvestPage implements OnInit {
         if (address) {
           // get user data
           await this.infoService.getUserInfo();
-          this.alreadyMinted = true;
+          this.alreadyMinted = await this.web3.ArbitrageContract.hasMinted(
+            this.web3.address
+          );
           if (this.alreadyMinted) {
             this.openState = ['swap', 'invest'];
           }
@@ -180,10 +182,13 @@ export class InvestPage implements OnInit {
   }
 
   public async stake() {
+    console.log('staking');
     this.loadingStake = true;
     try {
       const amount = this.stakeAmount;
-      await this.tokensService.stake(amount);
+      await this.tokensService.stake(
+        ethers.utils.parseEther(amount.toString()).toString()
+      );
       /*this.notificationService.notify({
       status: 'success',
       message: `You have successfully staked ${amount} NAS !`,
@@ -198,7 +203,9 @@ export class InvestPage implements OnInit {
     this.loadingStake = true;
     try {
       const amount = this.withdrawAmount;
-      await this.tokensService.withdrawStake(amount);
+      await this.tokensService.withdrawStake(
+        ethers.utils.parseEther(amount.toString()).toString()
+      );
       /*this.notificationService.notify({
       status: 'success',
       message: `You have successfully withdrawn ${amount} NAS !`,

@@ -1,6 +1,7 @@
-import { ConfigService } from '@nestjs/config';
 import { SupportedChainId, Token } from '@uniswap/sdk-core';
 import { FeeAmount } from '@uniswap/v3-sdk';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 // Enum of Dexes to use in arbitrage
 export enum Dex {
@@ -24,8 +25,9 @@ export const SUSHISWAP_SWAP_ROUTER_ADDRESS =
   '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
 
 // ARBITRAGE CONTRACTS
-export const ARBITRAGE_CONTRACT_ADDRESS = process.env.ARBITRAGE_CONTRACT_ADDRESS ||
-  '0x449527573acdFBC6D20b2b7c4969747B5E1263F2';
+export const ARBITRAGE_CONTRACT_ADDRESS =
+  process.env.ARBITRAGE_CONTRACT_ADDRESS ||
+  '0x4301682420BDb2227f04A3559A7F9dc9443e6C36';
 
 // ARBITRAGE TOKENS
 export const TOKEN_STAKING = new Token(
@@ -37,7 +39,8 @@ export const TOKEN_STAKING = new Token(
 );
 export const TOKEN_LOAN = new Token(
   CHAIN_ID,
-  process.env.FETH_TOKEN_ADRESS || '0xC97727ba966F6C52580121862dF2771A1Ca0F28a',
+  process.env.FETH_TOKEN_ADDRESS ||
+    '0xC97727ba966F6C52580121862dF2771A1Ca0F28a',
   18,
   'FETH',
   'Fake ETH',
@@ -54,3 +57,6 @@ export const PRICE_DIFF_PERCENTAGE = 0.5; // = 0.5% how much price difference tr
 export const SLIPPAGE = 0; // value between 0 and 1. 0 = no slippage, 1 = 100% slippage, 0.03 = 3% slippage
 
 export const PG_CONNECTION = 'PG_CONNECTION';
+
+console.log('NAS:', TOKEN_STAKING.address);
+console.log('FETH:', TOKEN_LOAN.address);

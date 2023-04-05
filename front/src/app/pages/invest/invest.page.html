@@ -125,13 +125,7 @@
               </ion-card-header>
               <ion-card-content>
                 <div *ngIf="userInfo">
-                  <div>{{ userInfo.nas | toETH }} <em>NAS</em></div>
-                  <div class="inputs">
-                    <ion-input
-                      label="NAS"
-                      placeholder="ENTER AMOUNT"
-                    ></ion-input>
-                  </div>
+                  <div>Balance: {{ userInfo.nas | toETH }} <em>NAS</em></div>
                 </div>
                 <div class="inputs">
                   <ion-input
@@ -152,7 +146,7 @@
               </ion-card-header>
               <ion-card-content>
                 <div *ngIf="userInfo">
-                  {{ userInfo.staked | toETH }} <em>NAS</em>
+                  {{ userInfo.totalProfits | toETH }} <em>NAS</em>
                 </div>
                 <div></div>
                 <ion-button (click)="claimProfits()" [disabled]="!userInfo"

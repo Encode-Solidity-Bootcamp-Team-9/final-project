@@ -104,7 +104,7 @@ export class AnalyticsPage implements OnInit {
   }
 
   private async updateHistory() {
-    // this.history = await this.infoService.getHistory();
+    this.history = await this.infoService.getHistory();
   }
 
   private updateArbitrage() {

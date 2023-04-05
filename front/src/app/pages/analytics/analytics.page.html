@@ -66,10 +66,10 @@
         </ion-item>
         <div class="ion-padding" slot="content">
           <div class="history">
-            <div class="history-item" *ngFor="let item of history">
+            <div class="history-item" *ngFor="let h of history">
               <ion-card class="chart">
                 <ion-card-header>
-                  <ion-card-title>{{ item.hash }}</ion-card-title>
+                  <ion-card-title>{{ h.hash }}</ion-card-title>
                 </ion-card-header>
                 <ion-card-content>
                   <div class="history-item-content">
@@ -81,23 +81,33 @@
                     <div class="stats">
                       <div>
                         <div class="title">Date:</div>
-                        <div class="value">{{ item.date.toISOString() }}</div>
+                        <div class="value">
+                          {{ h.date | date:'dd/MM/yyyy HH:mm:ss' }}
+                        </div>
                       </div>
                       <div>
                         <div class="title">Funds used:</div>
-                        <div class="value">{{ item.used }} <em>NAS</em></div>
+                        <div class="value">
+                          {{ h.used | toETH }} <em>NAS</em>
+                        </div>
                       </div>
                       <div>
                         <div class="title">Fees generated:</div>
-                        <div class="value">{{ item.profits }} <em>NAS</em></div>
+                        <div class="value">
+                          {{ h.profits | toETH }} <em>NAS</em>
+                        </div>
                       </div>
                       <div>
                         <div class="title">Bought from:</div>
-                        <div class="value"><em>{{ item.pool0 }}</em></div>
+                        <div class="value">
+                          <em>{{ h.pool0 ? 'Sushiswap' : 'Uniswap' }}</em>
+                        </div>
                       </div>
                       <div>
                         <div class="title">Sold to:</div>
-                        <div class="value"><em>{{ item.pool1 }}</em></div>
+                        <div class="value">
+                          <em>{{ h.pool1 ? 'Sushiswap' : 'Uniswap' }}</em>
+                        </div>
                       </div>
                     </div>
                   </div>

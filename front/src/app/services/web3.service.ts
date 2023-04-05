@@ -7,7 +7,7 @@ import { environment } from '../../environments/environment';
 
 import { NAS_TOKEN } from './contracts/NAS';
 import { FETH_TOKEN } from './contracts/FakeETH';
-import { ARBITRAGE } from './contracts/Arbitrage';
+import * as ARBITRAGE from './contracts/Arbitrage.json';
 
 const { NAS_ADDRESS, FETH_ADDRESS, ARBITRAGE_ADDRESS } = environment;
 
@@ -42,9 +42,11 @@ export class Web3Service {
       FETH_TOKEN.abi,
       this.provider
     );
+
+    const arbitrageAbit = ARBITRAGE;
     this.ArbitrageContract = new ethers.Contract(
       ARBITRAGE_ADDRESS,
-      ARBITRAGE.abi,
+      arbitrageAbit.abi,
       this.provider
     );
   }
