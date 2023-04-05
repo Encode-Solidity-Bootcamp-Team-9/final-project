@@ -144,6 +144,7 @@ export class SwapService {
     const approveFeth = await this.web3.FETHContract.connect(this.web3.signer!)[
       'approve'
     ](router, amount);
+    console.log(approveFeth);
     await approveFeth.wait();
   }
 }

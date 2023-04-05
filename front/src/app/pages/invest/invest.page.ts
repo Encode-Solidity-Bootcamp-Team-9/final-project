@@ -74,6 +74,7 @@ export class InvestPage implements OnInit {
 
   public loadingSwap: boolean = false;
   public loadingMint: boolean = false;
+  public loadingStake: boolean = false;
 
   constructor(
     private web3: Web3Service,
@@ -118,38 +119,62 @@ export class InvestPage implements OnInit {
     const feth = ethers.utils.parseEther(this.amountIn.toString()).toString();
     this.amountOut = Number(await this.swapService.getExpectedNAS(feth));
   }
+
   public async mint() {
-    await this.tokensService.mint();
-    /*this.notificationService.notify({
+    this.loadingMint = true;
+    try {
+      await this.tokensService.mint();
+      /*this.notificationService.notify({
       status: 'success',
       message: `You have successfully minted 10 FETH !`,
     });*/
+    } catch (e) {
+    } finally {
+      this.loadingMint = false;
+    }
   }
 
   public async stake() {
-    const amount = this.stakeAmount;
-    await this.tokensService.stake(amount);
-    /*this.notificationService.notify({
+    this.loadingStake = true;
+    try {
+      const amount = this.stakeAmount;
+      await this.tokensService.stake(amount);
+      /*this.notificationService.notify({
       status: 'success',
       message: `You have successfully staked ${amount} NAS !`,
     });*/
+    } catch (e) {
+    } finally {
+      this.loadingStake = false;
+    }
   }
 
   public async withdrawStake() {
-    const amount = this.withdrawAmount;
-    await this.tokensService.withdrawStake(amount);
-    /*this.notificationService.notify({
+    this.loadingStake = true;
+    try {
+      const amount = this.withdrawAmount;
+      await this.tokensService.withdrawStake(amount);
+      /*this.notificationService.notify({
       status: 'success',
       message: `You have successfully withdrawn ${amount} NAS !`,
     });*/
+    } catch (e) {
+    } finally {
+      this.loadingStake = false;
+    }
   }
 
   public async claimProfits() {
-    await this.tokensService.claimProfits();
-    /*this.notificationService.notify({
+    this.loadingStake = true;
+    try {
+      await this.tokensService.claimProfits();
+      /*this.notificationService.notify({
       status: 'success',
       message: `You have successfully claimed your profits !`,
     });*/
+    } catch (e) {
+    } finally {
+      this.loadingStake = false;
+    }
   }
-
 }
