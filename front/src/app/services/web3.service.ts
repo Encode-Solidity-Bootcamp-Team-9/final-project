@@ -1,13 +1,21 @@
 import { Injectable } from '@angular/core';
+import { SupportedChainId } from '@uniswap/sdk-core';
 import { ethers, providers } from 'ethers';
 import { BehaviorSubject } from 'rxjs';
 import { ApiService } from './api.service';
+import { environment } from '../../environments/environment';
+
+// import * as IUniswapV2Router02 from '@uniswap/v2-periphery/build/IUniswapV2Router02.json';
+
+const { SUSHISWAP_ROUTER_ADDRESS } = environment;
 
 declare global {
   interface Window {
     ethereum: any;
   }
 }
+
+const CHAIN_ID = SupportedChainId.POLYGON_MUMBAI;
 
 @Injectable({
   providedIn: 'root',
@@ -16,9 +24,20 @@ export class Web3Service {
   private addressSubject = new BehaviorSubject<string>('');
   public address$ = this.addressSubject.asObservable();
 
+  private sushiRouter: ethers.Contract | undefined;
+
+  private loadContracts() {
+    // this.sushiRouter = new ethers.Contract(
+    //   SUSHISWAP_ROUTER_ADDRESS,
+    //   IUniswapV2Router02.abi,
+    //   this.provider
+    // );
+  }
+
   constructor(private api: ApiService) {
     if (typeof window.ethereum !== 'undefined') {
       this.provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+      this.loadContracts();
     }
   }
 
@@ -26,7 +45,6 @@ export class Web3Service {
 
   private signer: providers.JsonRpcSigner | undefined;
 
-  private networkId: number = 80001;
   public provider: providers.Web3Provider | undefined;
 
   public async connect(): Promise<void> {
@@ -41,10 +59,10 @@ export class Web3Service {
   public async switchToNetwork() {
     if (!this.provider) return;
     const network = await this.provider.getNetwork();
-    if (network.chainId !== this.networkId) {
+    if (network.chainId !== CHAIN_ID) {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x13881' }],
+        params: [{ chainId: ethers.utils.hexValue(CHAIN_ID) }],
       });
     }
   }
