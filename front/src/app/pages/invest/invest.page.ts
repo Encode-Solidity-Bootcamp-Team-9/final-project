@@ -8,6 +8,7 @@ import { EChartsOption } from 'echarts';
 import { generatePieOptions } from '../home/utils';
 import { InfoService } from 'src/app/services/info.service';
 import { UserInfo } from 'src/app/models/user';
+import { Arbitrage } from 'src/app/models/arbitrage-tx';
 import { ToETHPipe } from 'src/app/pipes/to-eth.pipe';
 
 @Component({
@@ -34,10 +35,10 @@ export class InvestPage implements OnInit {
 
   public totalProfits: EChartsOption = generatePieOptions(
     [
-      { value: 10, name: 'Total Profits' },
+      { value: 10, name: 'Total Profits' }, //userInfo.totalProfits converted to ETH
       {
         value: 1000,
-        name: 'TVL Invested',
+        name: 'TVL Invested', //userInfo.staked converted to ETH
       },
     ],
     [TKN2_SYMBOL, TKN2_SYMBOL]
@@ -45,16 +46,17 @@ export class InvestPage implements OnInit {
 
   public currentPosition: EChartsOption = generatePieOptions(
     [
-      { value: 1000, name: 'Your Stake' },
+      { value: 1000, name: 'Your Stake' }, //userInfo.staked converted to ETH
       {
         value: 10000,
-        name: 'Total NAS Staked',
+        name: 'Total NAS Staked', //arbitrage.totalStaked converted to ETH
       },
     ],
     [TKN2_SYMBOL, TKN2_SYMBOL]
   );
 
   public userInfo: UserInfo | undefined;
+  public arbitrage: Arbitrage | undefined;
 
   constructor(private infoService: InfoService) {}
 
@@ -62,6 +64,11 @@ export class InvestPage implements OnInit {
     // get user data
     this.infoService.getUserInfo().then((user) => {
       this.userInfo = user;
+    });
+
+    //get arbitrage contract data
+    this.infoService.getArbitrage().then((arbitrage) => {
+      this.arbitrage = arbitrage;
     });
   }
 }
