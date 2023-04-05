@@ -13,10 +13,8 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 let signer: Wallet;
 
-// const FETH_ADDRESS = "0xAf1C3d676a63F69580c10dF835053E9B911908D0";
-// const NAS_ADDRESS = "0x96A6884433D93a82033B4877a598beFe7FF8FE90";
-const FETH_ADDRESS = "0x878C07588bA59912538b5d7f49Edd39CE8d36EfE";
-const NAS_ADDRESS = "0xFD28f091BBbB85A9c41B5Da029744a0A7C1A501A";
+const FETH_ADDRESS = "0xB30b5258299397f355ff58B82eFbaC594Ea0A8cc";
+const NAS_ADDRESS = "0x27b4E260749DDB780ea2AA0C30608c51ee28F6C4";
 let fethContract: Contract;
 let nasContract: Contract;
 

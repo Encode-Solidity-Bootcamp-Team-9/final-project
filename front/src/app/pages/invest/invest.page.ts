@@ -150,6 +150,9 @@ export class InvestPage implements OnInit {
     try {
       const feth = ethers.utils.parseEther(this.amountIn.toString()).toString();
       await this.swapService.swapFETHForNAS(feth);
+      await this.infoService.getUserInfo();
+      await this.infoService.getPoolsInfo();
+      await this.infoService.getArbitrageInfo();
     } catch (e) {
     } finally {
       this.loadingSwap = false;
