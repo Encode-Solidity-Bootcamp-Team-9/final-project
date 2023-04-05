@@ -8,20 +8,7 @@ export interface ArbitrageTx {
 }
 
 export interface Arbitrage {
-  address: string;  //arbitrage contract address
+  address: string; //arbitrage contract address
   totalStaked: string;
   totalProfits: string; // historical total profits
 }
-
-
-export interface PoolsState {
-  nasAddress: string
-  fethAddress: string
-  uniPoolAddress: string;
-  sushiPoolAddress: string;
-  uniFETH: string;
-  uniNAS: string;
-  sushiFETH: string;
-  sushiNAS: string;
-}
-

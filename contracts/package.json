@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "compile": "hardhat compile",
+    "main": "ts-node --files ./scripts/Main.ts",
+    "deploy": "ts-node --files ./scripts/Deployment.ts"
   },
   "keywords": [],
   "author": "",

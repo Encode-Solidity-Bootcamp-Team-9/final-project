@@ -48,4 +48,8 @@ export class Web3Service {
       });
     }
   }
+
+  public async swapFETHForNASUsingSushiswap(amount: string) {}
+
+  public async swapFETHForNASUsingUniswap(amount: string) {}
 }

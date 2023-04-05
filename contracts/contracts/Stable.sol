@@ -8,7 +8,7 @@ contract Stable is ERC20, AccessControl {
     
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
-    constructor() ERC20('Stable', 'STBL') {
+    constructor() ERC20('Not A Scam', 'NAS') {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
     }

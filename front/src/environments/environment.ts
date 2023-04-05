@@ -3,7 +3,11 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  FETH_ADDRESS: '',
+  NAS_ASSRESS: '',
+  SUSHISWAP_ROUTER_ADDRESS: '',
+  UNISWAP_ROUTER_ADDRESS: '',
 };
 
 /*

@@ -8,7 +8,7 @@ import { EChartsOption } from 'echarts';
 import { generatePieOptions } from '../home/utils';
 import { InfoService } from 'src/app/services/info.service';
 import { UserInfo } from 'src/app/models/user';
-import { ToETHPipe } from 'src/app/pipes/to-eth.pipe';
+import { PipesModule } from 'src/app/pipes/pipes.module';
 
 @Component({
   selector: 'app-invest',
@@ -20,7 +20,7 @@ import { ToETHPipe } from 'src/app/pipes/to-eth.pipe';
     CommonModule,
     FormsModule,
     NgxEchartsModule,
-    ToETHPipe,
+    PipesModule,
   ],
   providers: [
     {
