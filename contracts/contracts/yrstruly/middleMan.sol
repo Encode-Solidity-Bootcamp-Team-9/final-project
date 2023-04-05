@@ -91,10 +91,8 @@ contract MiddleMan is Ownable {
         // Will call both swap function
         // 0 means we sell our FETH, so path is FETH -> STBL
         // 1 means we sell our STBL, so path is STBL -> FETH
-
         swapOnSushi(sushiSide, sushiIn);
         swapOnUni(uniSide, uniIn);
-
     }
 
     function swapOnUni(uint256 side, uint amtIn) private {

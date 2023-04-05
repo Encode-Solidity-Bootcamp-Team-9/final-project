@@ -9,13 +9,18 @@ import '@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol';
 import {ArbitrageToken} from "./Token.sol";
 
 interface IFaucetToken {
+    function balanceOf(address account) external view returns (uint256);
+    function approve(address spender, uint256 amount) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function transfer(address to, uint256 amount) external returns (bool);
     function mint(address to, uint256 amount) external;
 }
 
 interface IStakedToken {
     function balanceOf(address addr) external returns (uint256);
-    function transferFrom(address from, address to, uint256 amount) external;
-    function transfer(address to, uint256 amount) external;
+    function approve(address spender, uint256 amount) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function transfer(address to, uint256 amount) external returns (bool);
 }
 
 contract Arbitrage is Ownable {
@@ -136,12 +141,120 @@ contract Arbitrage is Ownable {
     }
 
     /// @notice Performs arbitrage
-    function performArbitrage(Dex _sellAt, address _tokenToSell, address _tokenToBuy, uint256 _amount0In, uint256 _amount0Out, uint256 _amount1In, uint256 _amount1Out) external {
+    function performArbitrage(
+        Dex _sellAt, 
+        address _tokenToSell, 
+        address _tokenToBuy, 
+        uint256 _amount0In, 
+        uint256 _amount0Out, 
+        uint256 _amount1In, 
+        uint256 _amount1Out
+        ) external onlyOwner() {
         //Take percentage or all of totalStaked (??)
         //Buy faucet tokens with staked tokens where highest gain
         //Sell faucet token for staked tokens from second pool
         //Record the profits as profits = totalReturned - amountStaked
         //Add to the profits - anyway to avoid a loop here?
+
+        if (_sellAt == Dex.UNISWAP) {
+            // == 0 means we sell NAS on uniswap and buy on sushiswap
+            // == 1 means we sell NAS on sushiswap and buy on uniswap
+
+            // Set the side variables. We will always be selling NAS
+            // on the first dex and buy on the second
+            // Since here we are selling on Uniswap, we set
+            // uniSide to 1 (sell NAS, get FETH), and 
+            // sushiSide to 0 (sell FETH, get NAS)
+
+            swapOnUni(1, _amount0In, _amount0Out);
+            swapOnSushi(0, _amount1In, _amount1Out);
+
+        } else if (_sellAt == Dex.SUSHISWAP) {
+
+            swapOnSushi(1, _amount0In, _amount0Out);
+            swapOnUni(0, _amount1In, _amount1Out);
+
+        } else {
+            revert("DEX not recognized");
+        }
+
+    }
+
+    /// @notice Performs a swap on Uniswap
+    function swapOnUni(uint256 side, uint256 amtIn, uint256 amtOut) private {
+        // Setting at 0 for simplicity
+        uint256 amtOutMin = amtOut;
+        uint160 priceLimit = 0;
+
+        address tknIn;
+        address tknOut;
+
+        if (side == 0) {
+            tknIn = address(faucetToken);
+            tknOut = address(stakedToken);
+            faucetToken.approve(address(uniRouter), amtIn);
+        } else if (side == 1) {
+            tknIn = address(stakedToken);
+            tknOut = address(faucetToken);
+            stakedToken.approve(address(uniRouter), amtIn);
+        } else {
+            revert();
+        }
+
+        // Create the params that will be used to execute the swap
+        ISwapRouter.ExactInputSingleParams memory params =
+            ISwapRouter.ExactInputSingleParams({
+                tokenIn: tknIn,
+                tokenOut: tknOut,
+                fee: 3000,
+                recipient: address(this),
+                deadline: block.timestamp,
+                amountIn: amtIn,
+                amountOutMinimum: amtOutMin,
+                sqrtPriceLimitX96: priceLimit
+            });
+
+        // The call to `exactInputSingle` executes the swap.
+        uint256 amountOut = uniRouter.exactInputSingle(params);
+
+    }
+
+    /// @notice Performs a swap on Sushiswap
+    function swapOnSushi(uint256 side, uint256 amtIn, uint256 amtOut) private {
+        // 0 means we sell our FETH, so path is FETH -> STBL
+        // 1 means we sell our STBL, so path is STBL -> FETH
+        address[] memory path = new address[](2);
+        uint256 amountIn = amtIn;
+        uint256 amountOutMin = amtOut;
+
+        if (side == 0) {
+            path[0] = address(faucetToken);
+            path[1] = address(stakedToken);
+            faucetToken.approve(address(sushiRouter), amountIn);
+
+        } else if (side == 1) {
+            path[0] = address(stakedToken);
+            path[1] = address(faucetToken);
+            stakedToken.approve(address(sushiRouter), amountIn);
+
+        } else {
+            revert();
+        }
+
+        // Unix timestamp after which the tx will revert
+        uint256 deadline = block.timestamp;
+
+        // Sell
+        sushiRouter.swapExactTokensForTokens
+        (
+            amountIn, 
+            amountOutMin, 
+            path, 
+            address(this),
+            deadline
+        );
+        
+
     }
 
     /// @notice Claim profits
