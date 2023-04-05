@@ -1,4 +1,4 @@
-{
+export const FETH_TOKEN = {
   "_format": "hh-sol-artifact-1",
   "contractName": "FakeETH",
   "sourceName": "contracts/FakeETH.sol",

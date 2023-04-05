@@ -5,10 +5,12 @@ import { BehaviorSubject } from 'rxjs';
 import { ApiService } from './api.service';
 import { environment } from '../../environments/environment';
 
-import * as NAS_TOKEN from './contracts/NAS.json';
-import * as FETH_TOKEN from './contracts/FakeETH.json';
+import { NAS_TOKEN } from './contracts/NAS';
+import { FETH_TOKEN } from './contracts/FakeETH';
+import { ARBITRAGE } from './contracts/Arbitrage';
 
-const { NAS_ADDRESS, FETH_ADDRESS } = environment;
+
+const { NAS_ADDRESS, FETH_ADDRESS, ARBITRAGE_ADDRESS } = environment;
 
 declare global {
   interface Window {
@@ -27,6 +29,7 @@ export class Web3Service {
 
   public NASContract: ethers.Contract;
   public FETHContract: ethers.Contract;
+  public ArbitrageContract: ethers.Contract;
 
   constructor(private api: ApiService) {
     this.provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
@@ -38,6 +41,11 @@ export class Web3Service {
     this.FETHContract = new ethers.Contract(
       FETH_ADDRESS,
       FETH_TOKEN.abi,
+      this.provider
+    );
+    this.ArbitrageContract = new ethers.Contract(
+      ARBITRAGE_ADDRESS,
+      ARBITRAGE.abi,
       this.provider
     );
   }

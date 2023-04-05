@@ -1,4 +1,4 @@
-{
+export const NAS_TOKEN = {
   "_format": "hh-sol-artifact-1",
   "contractName": "NAS",
   "sourceName": "contracts/NAS.sol",
