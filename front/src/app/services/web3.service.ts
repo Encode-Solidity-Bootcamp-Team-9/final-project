@@ -9,7 +9,6 @@ import { NAS_TOKEN } from './contracts/NAS';
 import { FETH_TOKEN } from './contracts/FakeETH';
 import { ARBITRAGE } from './contracts/Arbitrage';
 
-
 const { NAS_ADDRESS, FETH_ADDRESS, ARBITRAGE_ADDRESS } = environment;
 
 declare global {
@@ -52,7 +51,7 @@ export class Web3Service {
 
   public address: string | undefined;
 
-  private signer: providers.JsonRpcSigner | undefined;
+  public signer: providers.JsonRpcSigner | undefined;
 
   public provider: providers.Web3Provider | undefined;
 

@@ -10,6 +10,10 @@ import { InfoService } from 'src/app/services/info.service';
 import { UserInfo } from 'src/app/models/user';
 import { Arbitrage } from 'src/app/models/arbitrage-tx';
 import { ToETHPipe } from 'src/app/pipes/to-eth.pipe';
+import { SwapService } from 'src/app/services/swap.service';
+import { ethers } from 'ethers';
+import { Web3Service } from 'src/app/services/web3.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-invest',
@@ -55,20 +59,59 @@ export class InvestPage implements OnInit {
     [TKN2_SYMBOL, TKN2_SYMBOL]
   );
 
-  public userInfo: UserInfo | undefined;
+  public get userInfo(): UserInfo | undefined {
+    return this.infoService.userInfo;
+  }
   public arbitrage: Arbitrage | undefined;
 
-  constructor(private infoService: InfoService) {}
+  public amountIn: number = 0;
+  public amountOut: number = 0;
+
+  private subs: Subscription[] = [];
+
+  public loadingSwap: boolean = false;
+  public loadingMint: boolean = false;
+
+  constructor(
+    private web3: Web3Service,
+    public infoService: InfoService,
+    private swapService: SwapService
+  ) {}
+
+  ngOnDestroy() {
+    this.subs.forEach((sub) => sub.unsubscribe());
+  }
 
   ngOnInit() {
-    // get user data
-    this.infoService.getUserInfo().then((user) => {
-      this.userInfo = user;
-    });
+    this.subs.push(
+      this.web3.address$.subscribe((address) => {
+        if (address) {
+          // get user data
+          this.infoService.getUserInfo().then((user) => {});
+        }
+      })
+    );
 
     //get arbitrage contract data
     this.infoService.getArbitrage().then((arbitrage) => {
       this.arbitrage = arbitrage;
     });
+  }
+
+  public async swap() {
+    this.loadingSwap = true;
+    try {
+      const feth = ethers.utils.parseEther(this.amountIn.toString()).toString();
+      await this.swapService.swapFETHForNAS(feth);
+    } catch (e) {
+    } finally {
+      this.loadingSwap = false;
+    }
+  }
+
+  public async onAmountChange() {
+    if (!this.amountIn) return;
+    const feth = ethers.utils.parseEther(this.amountIn.toString()).toString();
+    this.amountOut = Number(await this.swapService.getExpectedNAS(feth));
   }
 }

@@ -65,14 +65,23 @@
           <div class="swap-container">
             <div class="inputs">
               <ion-label class="balance">Balance <em>1.05 FETH</em></ion-label>
-              <ion-input label="FETH" placeholder="0"></ion-input>
+              <ion-input
+                label="FETH"
+                placeholder="0"
+                [(ngModel)]="amountIn"
+                (input)="onAmountChange()"
+              ></ion-input>
               <ion-input
                 label="NAS"
                 placeholder="0"
                 fill="outline"
                 disabled
+                [ngModel]="amountOut"
               ></ion-input>
-              <ion-button>Approve</ion-button>
+              <ion-button (click)="swap()" [disabled]="!userInfo">
+                <ion-label *ngIf="!loadingSwap">Approve & Swap</ion-label>
+                <ion-spinner *ngIf="loadingSwap" name="crescent"></ion-spinner>
+              </ion-button>
             </div>
           </div>
         </div>
@@ -96,7 +105,10 @@
                 <div *ngIf="userInfo">
                   <div>{{ userInfo.nas | toETH }} <em>NAS</em></div>
                   <div class="inputs">
-                    <ion-input label="NAS" placeholder="ENTER AMOUNT"></ion-input>
+                    <ion-input
+                      label="NAS"
+                      placeholder="ENTER AMOUNT"
+                    ></ion-input>
                   </div>
                 </div>
                 <ion-button>Stake</ion-button>
@@ -111,7 +123,9 @@
                 <div *ngIf="userInfo">
                   {{ userInfo.staked | toETH }} <em>NAS</em>
                 </div>
-                <div *ngIf="userInfo">Locked until: {{ userInfo.locktime }}</div>
+                <div *ngIf="userInfo">
+                  Locked until: {{ userInfo.locktime }}
+                </div>
                 <div>FIX DATE FORMAT</div>
                 <ion-button>Unstake + claim</ion-button>
               </ion-card-content>
