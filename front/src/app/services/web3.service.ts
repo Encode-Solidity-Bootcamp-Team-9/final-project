@@ -5,9 +5,10 @@ import { BehaviorSubject } from 'rxjs';
 import { ApiService } from './api.service';
 import { environment } from '../../environments/environment';
 
-// import * as IUniswapV2Router02 from '@uniswap/v2-periphery/build/IUniswapV2Router02.json';
+import * as NAS_TOKEN from './contracts/NAS.json';
+import * as FETH_TOKEN from './contracts/FakeETH.json';
 
-const { SUSHISWAP_ROUTER_ADDRESS } = environment;
+const { NAS_ADDRESS, FETH_ADDRESS } = environment;
 
 declare global {
   interface Window {
@@ -24,21 +25,21 @@ export class Web3Service {
   private addressSubject = new BehaviorSubject<string>('');
   public address$ = this.addressSubject.asObservable();
 
-  private sushiRouter: ethers.Contract | undefined;
-
-  private loadContracts() {
-    // this.sushiRouter = new ethers.Contract(
-    //   SUSHISWAP_ROUTER_ADDRESS,
-    //   IUniswapV2Router02.abi,
-    //   this.provider
-    // );
-  }
+  public NASContract: ethers.Contract;
+  public FETHContract: ethers.Contract;
 
   constructor(private api: ApiService) {
-    if (typeof window.ethereum !== 'undefined') {
-      this.provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-      this.loadContracts();
-    }
+    this.provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+    this.NASContract = new ethers.Contract(
+      NAS_ADDRESS,
+      NAS_TOKEN.abi,
+      this.provider
+    );
+    this.FETHContract = new ethers.Contract(
+      FETH_ADDRESS,
+      FETH_TOKEN.abi,
+      this.provider
+    );
   }
 
   public address: string | undefined;
@@ -66,8 +67,4 @@ export class Web3Service {
       });
     }
   }
-
-  public async swapFETHForNASUsingSushiswap(amount: string) {}
-
-  public async swapFETHForNASUsingUniswap(amount: string) {}
 }
