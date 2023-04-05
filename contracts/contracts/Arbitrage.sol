@@ -24,8 +24,6 @@ contract Arbitrage is Ownable {
     IFaucetToken public faucetToken;
     /// @notice Amount of faucet tokens distributed when claimed
     uint256 public faucetAmount;
-    /// @notice Amount of time required between two claims
-    uint256 public faucetLockTime;
 
     /// @notice Contract of staked token (token 1)
     IStakedToken public stakedToken;
@@ -53,8 +51,8 @@ contract Arbitrage is Ownable {
         uint256 withdrawn;
     }
     
-    /// @notice Mapping of address and faucet lock time
-    mapping(address => uint) public lockTime;
+    /// @notice Mapping of address and minting status
+    mapping(address => bool) public hasMinted;
     /// @notice Mapping of address to stake info
     mapping(address => StakeInfo) public stakeInfos;
     /// @notice Mapping of address to staking status
@@ -70,7 +68,6 @@ contract Arbitrage is Ownable {
     constructor(
         address _faucetToken,
         uint256 _faucetAmount,
-        uint256 _faucetLockTime,
         address _stakedToken,
         uint256 _stakeLockTime,
         address _sushiRouter,
@@ -78,19 +75,18 @@ contract Arbitrage is Ownable {
     ) {
         faucetToken = IFaucetToken(_faucetToken);
         faucetAmount = _faucetAmount;
-        faucetLockTime = _faucetLockTime;
         stakedToken = IStakedToken(_stakedToken);
         stakeLockTime = _stakeLockTime;
         sushiRouter = IUniswapV2Router02(_sushiRouter);
         uniRouter = ISwapRouter(_uniRouter);
     }
 
-    /// @notice Mints and transfers faucet tokens to caller, and resets time lock
-    /// @dev Requires giving contract "MINTER_ROLE" after deployment
+    /// @notice Mints and transfers faucet tokens to caller, operation only allowed once per wallet
+    /// @dev Requires giving contract "MINTER_ROLE" for FETH after deployment
     function requestTokens() external {
-        require(block.timestamp > lockTime[msg.sender], "Faucet lock time has not expired. Please try again later.");
+        require(hasMinted[msg.sender] == false, "You have already claimed the faucet.");
         faucetToken.mint(msg.sender, faucetAmount);
-        lockTime[msg.sender] = block.timestamp + faucetLockTime;
+        hasMinted[msg.sender] = true;
     }
 
     /// @notice Transfers staked amount to contract, stores details and emits event
@@ -115,21 +111,28 @@ contract Arbitrage is Ownable {
             claimed: 0,
             withdrawn: 0
         });
-
+        
         emit Staked(msg.sender, amount);
     }
 
-    /// @notice Withdraws stake
+    /// @notice Transfers amount of staked tokens back to user, updates state variables accordingly and emits event
+    /// @param amount Amount of tokens to be withdrawn by user
     function withdrawStake(uint amount) external {
         require(addressInStake[msg.sender] == true, "You don't have any staked tokens.");
         require(block.timestamp > stakeInfos[msg.sender].endTS, "You cannot yet withdraw your staked tokens.");
-        require(amount <= stakeInfos[msg.sender].amount, "You are trying to withdraw more than you have staked.");
-
+        require(amount <= stakeInfos[msg.sender].amount - stakeInfos[msg.sender].withdrawn, "You are trying to withdraw more than you have staked.");
+        //transfer tokens back to user
         stakedToken.transfer(msg.sender, amount);
+        //update the amount withdrawn by the user
         stakeInfos[msg.sender].withdrawn += amount;
+        //update total amount available for staking in the contract
         totalStaked -= amount;
-        //if 0 remove address in stake
-        //emit withdraw event
+        //if all tokens have been withdrawn, update the addressInStake boolean to false
+        if(stakeInfos[msg.sender].amount - stakeInfos[msg.sender].withdrawn == 0) {
+            addressInStake[msg.sender] == false;
+        }
+
+        emit Withdrawn(msg.sender, amount);
     }
 
     /// @notice Performs arbitrage
@@ -144,12 +147,14 @@ contract Arbitrage is Ownable {
     /// @notice Claim profits
     function claimArbitrageProfits() external {
         uint profit = stakeInfos[msg.sender].profit;
-        require(profit > 0, "You don't have any profits to claim.");
+        uint claimed = stakeInfos[msg.sender].claimed;
+        uint profitToBeClaimed = profit - claimed;
+        require(profitToBeClaimed > 0, "You don't have any profits to claim.");
  
-        stakedToken.transfer(msg.sender, profit);
-        stakeInfos[msg.sender].claimed -= profit;
+        stakedToken.transfer(msg.sender, profitToBeClaimed);
+        stakeInfos[msg.sender].claimed += profitToBeClaimed;
 
-        emit Claimed(msg.sender, profit);
+        emit Claimed(msg.sender, profitToBeClaimed);
     }
 
 }

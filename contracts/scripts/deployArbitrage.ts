@@ -7,10 +7,9 @@ import { Arbitrage__factory } from "../typechain-types";
 import path from "path";
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
-const FETH_TOKEN_ADDRESS = "0xC97727ba966F6C52580121862dF2771A1Ca0F28a";
-const NAS_TOKEN_ADDRESS = "0x9622F58d9745bAfaeABB7712a69DcdBdcF72e188";
+const FETH_TOKEN_ADDRESS = "0xAf1C3d676a63F69580c10dF835053E9B911908D0";
+const NAS_TOKEN_ADDRESS = "0x8439701Ea022C4b22B9B118419cC8b2FfC5D67F3";
 const FAUCET_AMOUNT = ethers.utils.parseEther("10");
-const FAUCET_LOCK_TIME_SECONDS = 10 * 60; //10 minutes
 const STAKE_LOCK_TIME_SECONDS = 30 * 60; //30 minutes
 const SUSHI_ROUTER_ADDRESS = "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506";
 const UNI_ROUTER_ADDRESS = "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45";
@@ -47,7 +46,7 @@ async function main() {
 
     // Deploying
     const contract = await fact.deploy(
-        FETH_TOKEN_ADDRESS, FAUCET_AMOUNT, FAUCET_LOCK_TIME_SECONDS, NAS_TOKEN_ADDRESS, STAKE_LOCK_TIME_SECONDS, SUSHI_ROUTER_ADDRESS, UNI_ROUTER_ADDRESS
+        FETH_TOKEN_ADDRESS, FAUCET_AMOUNT, NAS_TOKEN_ADDRESS, STAKE_LOCK_TIME_SECONDS, SUSHI_ROUTER_ADDRESS, UNI_ROUTER_ADDRESS
     );
 
     // Waiting for contract address to be mined
