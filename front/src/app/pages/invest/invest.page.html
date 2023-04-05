@@ -64,15 +64,13 @@
           </p>
           <div class="swap-container">
             <div class="inputs">
-              <ion-label class="balance">Balance <em>1.05 FETH</em></ion-label>
-              <ion-input
+              <ion-label class="balance">Balance <em *ngIf="userInfo"> {{ userInfo.feth | toETH }}</em></ion-label>
+              <ion-input 
                 label="FETH"
                 placeholder="0"
                 [(ngModel)]="amountIn"
                 (input)="onAmountChange()"
               ></ion-input>
-              <ion-label class="balance">Balance <em *ngIf="userInfo"> {{ userInfo.feth | toETH }}</em></ion-label>
-              <ion-input label="FETH" placeholder="0"></ion-input>
               <ion-input
                 label="NAS"
                 placeholder="0"
