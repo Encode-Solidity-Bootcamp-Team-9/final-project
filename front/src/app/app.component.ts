@@ -7,6 +7,7 @@ import { filter, Subscription } from 'rxjs';
 import { ToastController } from '@ionic/angular';
 import { NotificationService } from './services/notification.service';
 import { Web3Service } from './services/web3.service';
+import { InfoService } from './services/info.service';
 
 @Component({
   selector: 'app-root',
@@ -64,7 +65,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     private router: Router,
     private notificationService: NotificationService,
     private toastCtrl: ToastController,
-    private web3: Web3Service
+    private web3: Web3Service,
+    private info: InfoService
   ) {
     this.subs.push(
       this.router.events
@@ -134,6 +136,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   public async connect() {
     await this.web3.connect();
+    await this.info.getUserInfo();
   }
 
   ngOnDestroy(): void {

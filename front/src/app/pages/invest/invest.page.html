@@ -43,7 +43,7 @@
             faucet to mint up to <em>10.0 FETH</em>.
           </p>
           <div class="buttons">
-            <ion-button color="primary">Mint FETH</ion-button>
+            <ion-button color="primary" (click)="mint()">Mint FETH</ion-button>
           </div>
         </div>
       </ion-accordion>
@@ -71,6 +71,8 @@
                 [(ngModel)]="amountIn"
                 (input)="onAmountChange()"
               ></ion-input>
+              <ion-label class="balance">Balance <em *ngIf="userInfo"> {{ userInfo.feth | toETH }}</em></ion-label>
+              <ion-input label="FETH" placeholder="0"></ion-input>
               <ion-input
                 label="NAS"
                 placeholder="0"
@@ -99,7 +101,7 @@
           <div class="invest-infos">
             <ion-card>
               <ion-card-header>
-                <ion-card-title><em>NAS</em> Balance</ion-card-title>
+                <ion-card-title><em>NAS</em> Your Staked Balance</ion-card-title>
               </ion-card-header>
               <ion-card-content>
                 <div *ngIf="userInfo">
@@ -111,23 +113,23 @@
                     ></ion-input>
                   </div>
                 </div>
-                <ion-button>Stake</ion-button>
+                <div class="inputs">
+                  <ion-input label="NAS" placeholder="ENTER AMOUNT" [(ngModel)]="stakeAmount"></ion-input>
+                </div>
+                <ion-button (click) ="stake()">Stake</ion-button>
               </ion-card-content>
             </ion-card>
 
             <ion-card>
               <ion-card-header>
-                <ion-card-title><em>NAS</em> Staked + Profits</ion-card-title>
+                <ion-card-title><em>NAS</em> Your Profits</ion-card-title>
               </ion-card-header>
               <ion-card-content>
                 <div *ngIf="userInfo">
                   {{ userInfo.staked | toETH }} <em>NAS</em>
                 </div>
-                <div *ngIf="userInfo">
-                  Locked until: {{ userInfo.locktime }}
-                </div>
-                <div>FIX DATE FORMAT</div>
-                <ion-button>Unstake + claim</ion-button>
+                <div></div>
+                <ion-button (click) = "claimProfits()">Claim your profits</ion-button>
               </ion-card-content>
             </ion-card>
           </div>
@@ -148,7 +150,7 @@
             <ion-card class="chart">
               <ion-card-header>
                 <ion-card-title
-                  >Your Historical Stake vs Your Share of Fees</ion-card-title
+                  >Your Historical Stake vs Your Share of Profits</ion-card-title
                 >
               </ion-card-header>
               <ion-card-content>
@@ -160,6 +162,24 @@
               </ion-card-content>
             </ion-card>
           </div>
+          <div>
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title><em>NAS</em> Withdraw Your Stake</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <div *ngIf="userInfo">
+                  {{ userInfo.staked | toETH }} <em>NAS</em>
+                </div>
+                <div *ngIf="userInfo">Locked until: {{ userInfo.locktime }}</div>
+                <div>FIX DATE FORMAT</div>
+                <div class="inputs">
+                  <ion-input label="NAS" placeholder="ENTER AMOUNT" [(ngModel)]="withdrawAmount"></ion-input>
+                </div>
+                <ion-button (click) ="withdrawStake()">Withdraw</ion-button>
+              </ion-card-content>
+            </ion-card>
+        </div>
         </div>
       </ion-accordion>
     </ion-accordion-group>
