@@ -60,8 +60,10 @@ contract Arbitrage is Ownable {
     mapping(address => bool) public hasMinted;
     /// @notice Mapping of address to stake info
     mapping(address => StakeInfo) public stakeInfos;
+    address[] public stakers = [address(0)];
+
     /// @notice Mapping of address to staking status
-    mapping(address => bool) public addressInStake;
+    mapping(address => uint256) public addressInStake;
 
     /// @notice Enum which represent exchanges
     enum Dex { UNISWAP, SUSHISWAP }
@@ -99,14 +101,15 @@ contract Arbitrage is Ownable {
     /// @param amount Amount of tokens to be staked.
     function stakeToken(uint256 amount) external {
         require(amount > 0, "Stake amount should be more than zero");
-        require(addressInStake[msg.sender] == false, "You have already staked tokens");
+        require(addressInStake[msg.sender] > 0, "You have already staked tokens");
         require(stakedToken.balanceOf(msg.sender) >= amount, "Insufficient balance");
        
         stakedToken.transferFrom(msg.sender, address(this), amount);
 
         totalStaked += amount;
         
-        addressInStake[msg.sender] == true;
+        addressInStake[msg.sender] == stakers.length;
+        stakers.push(msg.sender);
 
         stakeInfos[msg.sender] = StakeInfo({
             startTS: block.timestamp,
@@ -116,6 +119,7 @@ contract Arbitrage is Ownable {
             claimed: 0,
             withdrawn: 0
         });
+
         
         emit Staked(msg.sender, amount);
     }
@@ -123,7 +127,7 @@ contract Arbitrage is Ownable {
     /// @notice Transfers amount of staked tokens back to user, updates state variables accordingly and emits event
     /// @param amount Amount of tokens to be withdrawn by user
     function withdrawStake(uint amount) external {
-        require(addressInStake[msg.sender] == true, "You don't have any staked tokens.");
+        require(addressInStake[msg.sender] > 0, "You don't have any staked tokens.");
         require(block.timestamp > stakeInfos[msg.sender].endTS, "You cannot yet withdraw your staked tokens.");
         require(amount <= stakeInfos[msg.sender].amount - stakeInfos[msg.sender].withdrawn, "You are trying to withdraw more than you have staked.");
         //transfer tokens back to user
@@ -134,7 +138,12 @@ contract Arbitrage is Ownable {
         totalStaked -= amount;
         //if all tokens have been withdrawn, update the addressInStake boolean to false
         if(stakeInfos[msg.sender].amount - stakeInfos[msg.sender].withdrawn == 0) {
-            addressInStake[msg.sender] == false;
+            uint256 idx = addressInStake[msg.sender];
+            addressInStake[msg.sender] = 0;
+            for (uint256 i = idx + 1; i < stakers.length; i++) {
+                addressInStake[stakers[i]] -= 1;
+            }
+            delete stakers[idx];
         }
 
         emit Withdrawn(msg.sender, amount);
@@ -150,6 +159,7 @@ contract Arbitrage is Ownable {
         uint256 _amount1In, 
         uint256 _amount1Out
         ) external {
+        uint256 pre = stakedToken.balanceOf(address(this));
         //Take percentage or all of totalStaked (??)
         //Buy faucet tokens with staked tokens where highest gain
         //Sell faucet token for staked tokens from second pool
@@ -177,7 +187,15 @@ contract Arbitrage is Ownable {
         } else {
             revert("DEX not recognized");
         }
-
+        uint256 post = stakedToken.balanceOf(address(this));
+        require(post >= pre, 'Not enough profits');
+        uint256 profits = post - pre;
+        totalProfits += profits;
+        for(uint256 i = 1; i < stakers.length; i++) {
+            StakeInfo memory data = stakeInfos[stakers[i]];
+            uint256 currentStake = data.amount - data.withdrawn;
+            data.profit += profits * (currentStake / totalStaked);
+        }
     }
 
     /// @notice Performs a swap on Uniswap
