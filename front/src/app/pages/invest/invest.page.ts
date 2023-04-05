@@ -40,9 +40,9 @@ export class InvestPage implements OnInit {
 
   public totalProfits: EChartsOption = generatePieOptions(
     [
-      { value: 10, name: 'Total Profits' }, //userInfo.totalProfits converted to ETH
+      { value: 0, name: 'Total Profits' }, //userInfo.totalProfits converted to ETH
       {
-        value: 1000,
+        value: 0,
         name: 'TVL Invested', //userInfo.staked converted to ETH
       },
     ],
@@ -51,9 +51,9 @@ export class InvestPage implements OnInit {
 
   public currentPosition: EChartsOption = generatePieOptions(
     [
-      { value: 1000, name: 'Your Stake' }, //userInfo.staked converted to ETH
+      { value: 0, name: 'Your Stake' }, //userInfo.staked converted to ETH
       {
-        value: 10000,
+        value: 0,
         name: 'Total NAS Staked', //arbitrage.totalStaked converted to ETH
       },
     ],
@@ -63,7 +63,10 @@ export class InvestPage implements OnInit {
   public get userInfo(): UserInfo | undefined {
     return this.infoService.userInfo;
   }
-  public arbitrage: Arbitrage | undefined;
+  public get arbitrage(): Arbitrage | undefined {
+    return this.infoService.arbitrage;
+  }
+
   public stakeAmount: number = 0;
   public withdrawAmount: number = 0;
 
@@ -75,6 +78,7 @@ export class InvestPage implements OnInit {
   public loadingSwap: boolean = false;
   public loadingMint: boolean = false;
   public loadingStake: boolean = false;
+  public alreadyMinted: boolean = false;
 
   constructor(
     private web3: Web3Service,
@@ -89,18 +93,56 @@ export class InvestPage implements OnInit {
 
   ngOnInit() {
     this.subs.push(
-      this.web3.address$.subscribe((address) => {
+      this.web3.address$.subscribe(async (address) => {
         if (address) {
           // get user data
-          this.infoService.getUserInfo().then((user) => {});
+          await this.infoService.getUserInfo();
+          this.alreadyMinted = true;
+          if (this.alreadyMinted) {
+            this.openState = ['swap', 'invest'];
+          }
         }
       })
     );
 
     //get arbitrage contract data
-    this.infoService.getArbitrage().then((arbitrage) => {
-      this.arbitrage = arbitrage;
-    });
+    this.infoService.getArbitrageInfo().then((arbitrage) => {});
+
+    this.subs.push(
+      this.infoService.refresh.subscribe(() => {
+        if (!this.userInfo || !this.arbitrage) return;
+        const totalProfits = Number(
+          ethers.utils.formatEther(this.userInfo.totalProfits)
+        );
+        const totalStaked = Number(
+          ethers.utils.formatEther(this.userInfo.staked)
+        );
+        const arbitrageStaked = Number(
+          ethers.utils.formatEther(this.arbitrage.totalStaked)
+        );
+        this.totalProfits = generatePieOptions(
+          [
+            { value: totalProfits, name: 'Total Profits' }, //userInfo.totalProfits converted to ETH
+            {
+              value: totalStaked,
+              name: 'TVL Invested', //userInfo.staked converted to ETH
+            },
+          ],
+          [TKN2_SYMBOL, TKN2_SYMBOL]
+        );
+
+        this.currentPosition = generatePieOptions(
+          [
+            { value: totalStaked, name: 'Your Stake' }, //userInfo.staked converted to ETH
+            {
+              value: arbitrageStaked,
+              name: 'Total NAS Staked', //arbitrage.totalStaked converted to ETH
+            },
+          ],
+          [TKN2_SYMBOL, TKN2_SYMBOL]
+        );
+      })
+    );
   }
 
   public async swap() {

@@ -14,7 +14,7 @@
               </ion-card-header>
               <ion-card-content>
                 <div *ngIf="arbitrage">
-                  TVL invested: {{ arbitrage.totalStaked | toETH }} NAS<br>
+                  TVL invested: {{ arbitrage.totalStaked | toETH }} NAS<br />
                   Total Profits: {{ arbitrage.totalProfits | toETH }} NAS
                 </div>
                 <div
@@ -30,12 +30,12 @@
               </ion-card-header>
               <ion-card-content>
                 <div *ngIf="poolsState">
-                  NAS: {{ poolsState.uniNAS | toETH }}<br>
+                  NAS: {{ poolsState.uniNAS | toETH }}<br />
                   FETH: {{ poolsState.uniFETH | toETH }}
                 </div>
                 <div
                   echarts
-                  [options]="poolBalance"
+                  [options]="poolUniBalance"
                   class="chart-container"
                 ></div>
               </ion-card-content>
@@ -46,12 +46,12 @@
               </ion-card-header>
               <ion-card-content>
                 <div *ngIf="poolsState">
-                  NAS: {{ poolsState.sushiNAS | toETH }}<br>
+                  NAS: {{ poolsState.sushiNAS | toETH }}<br />
                   FETH: {{ poolsState.sushiFETH | toETH }}
                 </div>
                 <div
                   echarts
-                  [options]="poolBalance"
+                  [options]="poolSushiBalance"
                   class="chart-container"
                 ></div>
               </ion-card-content>

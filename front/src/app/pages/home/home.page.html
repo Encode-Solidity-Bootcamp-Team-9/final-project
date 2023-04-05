@@ -37,7 +37,7 @@
                 <ion-card-header>
                   <ion-card-title>APR</ion-card-title>
                 </ion-card-header>
-                <ion-card-content>1,50%</ion-card-content>
+                <ion-card-content>15.3%</ion-card-content>
               </ion-card>
               <ion-card>
                 <ion-card-header>
@@ -63,8 +63,12 @@
           </div>
 
           <div class="buttons">
-            <ion-button fill="clear">How it works ?</ion-button>
-            <ion-button fill="clear">Invest</ion-button>
+            <ion-button fill="clear" (click)="goTo('about')"
+              >How it works ?</ion-button
+            >
+            <ion-button fill="clear" (click)="goTo('invest')"
+              >Invest</ion-button
+            >
           </div>
         </div>
       </div>

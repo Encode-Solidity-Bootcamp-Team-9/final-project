@@ -2,7 +2,11 @@
   <div class="container">
     <ion-accordion-group [multiple]="true" [value]="openState">
       <!-- Summary -->
-      <ion-accordion value="summary" toggleIconSlot="start">
+      <ion-accordion
+        value="summary"
+        toggleIconSlot="start"
+        [class.done]="alreadyMinted"
+      >
         <ion-item slot="header">
           <div class="timeline-step">
             <div class="hexagon"><div>0</div></div>
@@ -27,7 +31,11 @@
       </ion-accordion>
 
       <!-- Mint -->
-      <ion-accordion value="mint" toggleIconSlot="start">
+      <ion-accordion
+        value="mint"
+        toggleIconSlot="start"
+        [class.done]="alreadyMinted"
+      >
         <ion-item slot="header">
           <div class="timeline-step">
             <div class="hexagon"><div>1</div></div>
@@ -43,7 +51,11 @@
             faucet to mint up to <em>10.0 FETH</em>.
           </p>
           <div class="buttons">
-            <ion-button color="primary" (click)="mint()">
+            <ion-button
+              color="primary"
+              (click)="mint()"
+              [disabled]="!userInfo || alreadyMinted"
+            >
               <ion-label *ngIf="!loadingMint">Mint FETH</ion-label>
               <ion-spinner *ngIf="loadingMint" name="crescent"></ion-spinner>
             </ion-button>
@@ -63,7 +75,7 @@
           <p>
             Swap your <em>FETH</em> for some <em>NAS</em>. We automatically
             route you to the best price using either <em>Uniswap</em> pool or
-            <em>Sushiswap</em> pool. You currently have <em>1.05 FETH</em>.
+            <em>Sushiswap</em> pool.
           </p>
           <div class="swap-container">
             <div class="inputs">
@@ -128,7 +140,9 @@
                     [(ngModel)]="stakeAmount"
                   ></ion-input>
                 </div>
-                <ion-button (click)="stake()">Stake</ion-button>
+                <ion-button (click)="stake()" [disabled]="!userInfo"
+                  >Stake</ion-button
+                >
               </ion-card-content>
             </ion-card>
 
@@ -141,7 +155,7 @@
                   {{ userInfo.staked | toETH }} <em>NAS</em>
                 </div>
                 <div></div>
-                <ion-button (click)="claimProfits()"
+                <ion-button (click)="claimProfits()" [disabled]="!userInfo"
                   >Claim your profits</ion-button
                 >
               </ion-card-content>
@@ -189,17 +203,19 @@
                   {{ userInfo.staked | toETH }} <em>NAS</em>
                 </div>
                 <div *ngIf="userInfo">
-                  Locked until: {{ userInfo.locktime }}
+                  Locked until: {{ userInfo.locktime | date: 'dd/MM/yyyy
+                  HH:mm:ss'}}
                 </div>
-                <div>FIX DATE FORMAT</div>
-                <div class="inputs">
+                <div class="withdraw-inputs">
                   <ion-input
                     label="NAS"
                     placeholder="ENTER AMOUNT"
                     [(ngModel)]="withdrawAmount"
                   ></ion-input>
                 </div>
-                <ion-button (click)="withdrawStake()">Withdraw</ion-button>
+                <ion-button (click)="withdrawStake()" [disabled]="!userInfo"
+                  >Withdraw</ion-button
+                >
               </ion-card-content>
             </ion-card>
           </div>

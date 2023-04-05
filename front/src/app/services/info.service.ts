@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ethers } from 'ethers';
+import { Subject } from 'rxjs';
 import { Arbitrage } from '../models/arbitrage-tx';
 import { PoolsState } from '../models/pool';
 import { UserInfo } from '../models/user';
@@ -14,10 +15,13 @@ export class InfoService {
   public userInfo: UserInfo | undefined;
   public arbitrage: Arbitrage | undefined;
 
+  public refresh = new Subject<void>();
+
   constructor(private api: ApiService, private web3: Web3Service) {}
 
   public async getArbitrageInfo(): Promise<Arbitrage> {
     this.arbitrage = await this.api.get<Arbitrage>(`info/contract`);
+    this.refresh.next();
     return this.arbitrage;
   }
 
@@ -31,6 +35,7 @@ export class InfoService {
       .parseUnits(this.poolsState.sushiFETH)
       .div(ethers.utils.parseUnits(this.poolsState.sushiNAS))
       .toNumber();
+    this.refresh.next();
     return this.poolsState;
   }
 
@@ -39,32 +44,10 @@ export class InfoService {
       this.userInfo = await this.api.get<UserInfo>(
         `info/user/${this.web3.address}`
       );
+      this.refresh.next();
       return this.userInfo;
     } else {
-      return undefined;
-    }
-  }
-
-  public async swap(amount: number) {
-    // const amountInETH = ethers.utils.parseEther(amount.toString()).toString();
-    // if (this.poolsState === undefined) {
-    //   await this.getPoolsInfo();
-    // }
-    // if (this.poolsState!.uniRatio! > this.poolsState?.sushiRatio!) {
-    //   await this.web3.swapFETHForNASUsingSushiswap(amountInETH);
-    // } else {
-    //   await this.web3.swapFETHForNASUsingUniswap(amountInETH);
-    // }
-  }
-
-  public async getArbitrage(): Promise<Arbitrage | undefined> {
-    if (this.web3.address) {
-      // do the call to the back end
-      const data = this.api.get<Arbitrage>(
-        `info/contract/${this.web3.address}`
-      );
-      return data;
-    } else {
+      this.refresh.next();
       return undefined;
     }
   }
