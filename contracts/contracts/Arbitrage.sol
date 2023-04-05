@@ -149,7 +149,7 @@ contract Arbitrage is Ownable {
         uint256 _amount0Out, 
         uint256 _amount1In, 
         uint256 _amount1Out
-        ) external onlyOwner() {
+        ) external {
         //Take percentage or all of totalStaked (??)
         //Buy faucet tokens with staked tokens where highest gain
         //Sell faucet token for staked tokens from second pool
