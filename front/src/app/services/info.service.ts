@@ -25,4 +25,14 @@ export class InfoService {
       return undefined;
     }
   }
+
+  public async getArbitrage(): Promise<Arbitrage | undefined> {
+    if (this.web3.address) {
+      // do the call to the back end
+      const data = this.api.get<Arbitrage>(`info/contract/${this.web3.address}`);
+      return data;
+    } else {
+      return undefined;
+    }
+  }
 }
