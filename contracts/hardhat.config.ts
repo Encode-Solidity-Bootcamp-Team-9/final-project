@@ -1,5 +1,14 @@
+import * as dotenv from "dotenv";
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+
+// For macOS users
+import path from "path";
+dotenv.config({ path: path.resolve(__dirname, ".env") });
+
+const POLYGONSCAN_API_KEY = getEnvVariableValue("POLYGONSCAN_API_KEY");
+const ALCHEMY_API_KEY = getEnvVariableValue("ALCHEMY_API_KEY");
+const PRIVATE_KEY = getEnvVariableValue("PRIVATE_KEY");
 
 const config: HardhatUserConfig = {
   paths: { tests: "tests" },
@@ -25,23 +34,26 @@ const config: HardhatUserConfig = {
     }
   },
   networks: {
-    goerli: {
-      chainId: 5,
-      url: `https://eth-goerli.alchemyapi.io/v2/c6DalefEuYNe2PJdprfD8I95Eo7LkIUg`,
-      accounts: ["e759cb1030cd6b2c76eb1476f0a05110c316cfc89e039368a280d512ddca2333"],
-    },
     mumbai: {
       chainId: 80001,
-      url: `https://polygon-mumbai.g.alchemy.com/v2/cUPcNv4p61xgbX-_oLMTprrni2Z9wZPj`,
-      accounts: ["39bfebe1a0a6dcb4502ae085d9bcc8c7c75b6467255f82343ef51f10adb89442"]
+      url: `https://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+      accounts: [PRIVATE_KEY]
     },
   },
   etherscan: {
     apiKey: {
-      goerli: "B6K4YRQV5EMM2HVG8E77CBNUKCSMUEIEMT",
-      polygonMumbai: "D6DQ5T5A3ZM4FH34WCQDT2FU6US9WI1FA4"
+      polygonMumbai: POLYGONSCAN_API_KEY
     }
   },
 };
 
 export default config;
+
+
+function getEnvVariableValue(varName: string): string {
+  const varValue = process.env[varName];
+  if (!varValue || varValue.length < 1) {
+      throw new Error(`Must provide a valid value for key ${varName}. Check your.env file!`);
+  };
+  return varValue;
+}

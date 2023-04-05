@@ -16,14 +16,14 @@ async function main() {
             return;
         case '1':
             await run("verify:verify", {
-                address: "0x7d5D9602eDc1cA865FD38B5CcAfF7d464C4168A1",
+                address: "0xa5894Aa86F9df7c5938A986eee9809751088A7D5",
                 constructorArguments: ["FakeETH", "ETH"],
             });
             break;
         case '2':
             await run("verify:verify", {
-                address: "0xab2Be03f150278aa83BcA0b73aA8Ac882aAd2851",
-                constructorArguments: ["Stable", "STBL"],
+                address: "0x8439701Ea022C4b22B9B118419cC8b2FfC5D67F3",
+                constructorArguments: ["NotAScam", "NAS"],
             });
             break;
     }

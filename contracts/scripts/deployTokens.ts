@@ -1,3 +1,6 @@
+//Verify with:
+//npx hardhat verify [FakeETHaddress] --contract "contracts/FakeETH.sol:FakeETH" --network mumbai
+
 //Deploys the two ERC20 tokens that will be used in the arbitrage pools.
 import * as readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
