@@ -6,7 +6,7 @@
         <div class="block-content">
           <p class="name">Team 9 <em>Arbitrage</em> DAO</p>
           <p class="subtext">
-            Your place to lean about arbitage and enjoy some of the profits !
+            Your place to learn about arbitrage and enjoy some of the profits !
           </p>
           <p>
             We use <em>AI</em> to extract the best
@@ -21,7 +21,7 @@
             <ion-card class="chart">
               <ion-card-header>
                 <ion-card-title
-                  >Current TVL vs Total Fees Generated</ion-card-title
+                  >Current TVL vs Total Profits Generated</ion-card-title
                 >
               </ion-card-header>
               <ion-card-content>
@@ -43,13 +43,21 @@
                 <ion-card-header>
                   <ion-card-title>Total Value Locked</ion-card-title>
                 </ion-card-header>
-                <ion-card-content>2000 NAS</ion-card-content>
+                <ion-card-content>
+                  <div *ngIf="arbitrage">
+                    {{ arbitrage.totalStaked | toETH }} <em>NAS</em>
+                  </div>
+                </ion-card-content>
               </ion-card>
               <ion-card>
                 <ion-card-header>
-                  <ion-card-title>Total Fees Generated</ion-card-title>
+                  <ion-card-title>Total Profits Generated</ion-card-title>
                 </ion-card-header>
-                <ion-card-content>2M NAS</ion-card-content>
+                <ion-card-content>
+                  <div *ngIf="arbitrage">
+                    {{ arbitrage.totalProfits | toETH }} <em>NAS</em>
+                  </div>
+                </ion-card-content>
               </ion-card>
             </div>
           </div>

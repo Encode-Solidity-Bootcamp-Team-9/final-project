@@ -6,13 +6,16 @@ import { NgxEchartsModule, NGX_ECHARTS_CONFIG } from 'ngx-echarts';
 import { EChartsOption } from 'echarts';
 import { generatePieOptions } from './utils';
 import { TKN2_SYMBOL } from 'src/app/utils/consts';
+import { Arbitrage } from 'src/app/models/arbitrage-tx';
+import { InfoService } from 'src/app/services/info.service';
+import { ToETHPipe } from 'src/app/pipes/to-eth.pipe';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule, NgxEchartsModule],
+  imports: [IonicModule, CommonModule, FormsModule, NgxEchartsModule, ToETHPipe],
   providers: [
     {
       provide: NGX_ECHARTS_CONFIG,
@@ -32,7 +35,14 @@ export class HomePage implements OnInit {
     [TKN2_SYMBOL, TKN2_SYMBOL]
   );
 
-  constructor() {}
+  public arbitrage: Arbitrage | undefined;
 
-  ngOnInit() {}
+  constructor(private infoService: InfoService) {}
+
+  ngOnInit() {
+    //get arbitrage contract data
+    this.infoService.getArbitrageInfo().then((arbitrage) => {
+      this.arbitrage = arbitrage;
+    });
+  }
 }
