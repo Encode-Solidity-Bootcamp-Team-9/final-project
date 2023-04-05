@@ -42,9 +42,9 @@ export class StrategyExecution {
       strategy.sellToken.address,
       strategy.buyToken.address,
       strategy.firstTrade0,
-      0,
+      strategy.firstTrade1,
       strategy.secondTrade0,
-      0,
+      strategy.secondTrade1,
     );
     const txReceipt = await tx.wait();
     console.log('Arbitrage executed!');
