@@ -3,15 +3,12 @@ import { BigNumber, ethers } from 'ethers';
 
 @Pipe({
   name: 'toETH',
-  standalone: true
+  standalone: true,
 })
 export class ToETHPipe implements PipeTransform {
   transform(value: BigNumber | string | undefined): string {
     if (value === undefined) {
       return '0';
-    }
-    if (typeof value === 'string') {
-      return value;
     }
     let str = ethers.utils.formatEther(value);
     const representation = str.split('.');
