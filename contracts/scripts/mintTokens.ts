@@ -4,7 +4,7 @@ import { stdin as input, stdout as output } from "node:process";
 import * as dotenv from "dotenv";
 import { Contract, ethers, Wallet } from "ethers";
 import FakeETH from '../artifacts/contracts/FakeETH.sol/FakeETH.json';
-import Stable from '../artifacts/contracts/Stable.sol/Stable.json';
+import NAS from '../artifacts/contracts/NAS.sol/NAS.json';
 
 
 // For macOS users
@@ -14,10 +14,10 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 let signer: Wallet;
 
-const FETH_ADDRESS = "0x7d5D9602eDc1cA865FD38B5CcAfF7d464C4168A1";
-const STBL_ADDRESS = "0xab2Be03f150278aa83BcA0b73aA8Ac882aAd2851";
+const FETH_ADDRESS = "0xAf1C3d676a63F69580c10dF835053E9B911908D0";
+const NAS_ADDRESS = "0x96A6884433D93a82033B4877a598beFe7FF8FE90";
 let fethContract: Contract;
-let stblContract: Contract;
+let nasContract: Contract;
 
 const rl = readline.createInterface({input, output});
 
@@ -31,38 +31,32 @@ async function main() {
         signer
     );
 
-    stblContract = new ethers.Contract(
-        STBL_ADDRESS,
-        Stable.abi,
+    nasContract = new ethers.Contract(
+        NAS_ADDRESS,
+        NAS.abi,
         signer
     );
 
-    const answer = await rl.question("Actions: \n Options: \n [1]: Mint FakeETH token \n [2]: Mint Stable token \n [3]: Get token balance \n [4]: Give minter role for both tokens \n [5]: Check minter role \n");
+    const answer = await rl.question("Actions: \n Options: \n [1]: Mint FakeETH token \n [2]: Mint NAS token \n [3]: Get token balance \n [4]: Give minter role for both tokens \n [5]: Check minter role \n");
 
     switch (answer) {
         case '1':
-            
             await mint(fethContract);
             break;
         case '2':
-            stblContract = new ethers.Contract(
-                STBL_ADDRESS,
-                Stable.abi,
-                signer
-            );
-            await mint(stblContract);
+            await mint(nasContract);
             break;
         case '3':
             const address = await rl.question("Account address: ");
             let fethBalance = ethers.utils.formatEther(await fethContract.balanceOf(address));
-            let stblBalance = ethers.utils.formatEther(await stblContract.balanceOf(address));
+            let stblBalance = ethers.utils.formatEther(await nasContract.balanceOf(address));
             console.log(`Account ${address} has ${fethBalance} FETH and ${stblBalance} STBL`);
             break;
         case '4':
             const grantee = await rl.question("Account address: ");
             await confirmTx(`Grant ${grantee} minter role for FETH and STBL`);
             const grantFethMinter = await fethContract.grantRole(keccak256(toUtf8Bytes("MINTER_ROLE")), grantee);
-            const grantStblMinter = await stblContract.grantRole(keccak256(toUtf8Bytes("MINTER_ROLE")), grantee);
+            const grantStblMinter = await nasContract.grantRole(keccak256(toUtf8Bytes("MINTER_ROLE")), grantee);
             await grantFethMinter.wait();
             await grantStblMinter.wait();
             console.log(`Minter role granted.`);
@@ -70,7 +64,7 @@ async function main() {
         case '5':
             const account = await rl.question("Account address: ");
             const fethMinter = await fethContract.hasRole(keccak256(toUtf8Bytes("MINTER_ROLE")), account);
-            const stblMinter = await stblContract.hasRole(keccak256(toUtf8Bytes("MINTER_ROLE")), account);
+            const stblMinter = await nasContract.hasRole(keccak256(toUtf8Bytes("MINTER_ROLE")), account);
             console.log(`Account ${account} has minter role for:\nFETH: ${fethMinter}\nSTBL: ${stblMinter}`);
             break;
         }
@@ -84,8 +78,8 @@ main().catch((error) => {
 
 async function getSigner() {
     const provider = new ethers.providers.AlchemyProvider(
-        "goerli",
-        getEnvVariableValue("ALCHEMY_API_KEY")
+        "maticmum",
+        process.env.ALCHEMY_API_KEY
     );
     const wallet = new ethers.Wallet(getEnvVariableValue("PRIVATE_KEY"));
     signer = wallet.connect(provider);

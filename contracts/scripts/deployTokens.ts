@@ -3,7 +3,7 @@ import * as readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import * as dotenv from "dotenv";
 import { ethers, Wallet } from "ethers";
-import { FakeETH, FakeETH__factory, Stable, Stable__factory } from "../typechain-types";
+import { FakeETH, FakeETH__factory, NAS, NAS__factory } from "../typechain-types";
 
 // For macOS users
 import path from "path";
@@ -11,7 +11,7 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 let signer: Wallet;
 let fethContract: FakeETH;
-let stblContract: Stable;
+let nasContract: NAS;
 
 const rl = readline.createInterface({input, output});
 
@@ -19,27 +19,27 @@ async function main() {
 
     await getSigner();
 
-    await confirmTx(`Deploy FETH and STBL tokens`);
+    await confirmTx(`Deploy FETH and NAS tokens`);
 
     console.log(`Deploying tokens...`)
 
     const fethFactory = new FakeETH__factory(signer);
-    const stblFactory = new Stable__factory(signer);
+    const nasFactory = new NAS__factory(signer);
 
     fethContract = await fethFactory.deploy();
-    stblContract = await stblFactory.deploy();
+    nasContract = await nasFactory.deploy();
 
     const fethReceipt = await fethContract.deployTransaction.wait();
-    const stblReceipt = await stblContract.deployTransaction.wait();
+    const nasReceipt = await nasContract.deployTransaction.wait();
 
-    const gasUsed = fethReceipt.gasUsed.add(stblReceipt.gasUsed);
+    const gasUsed = fethReceipt.gasUsed.add(nasReceipt.gasUsed);
     const txCost = fethReceipt.effectiveGasPrice.mul(fethReceipt.gasUsed).add(
-        stblReceipt.effectiveGasPrice.mul(stblReceipt.gasUsed)
+        nasReceipt.effectiveGasPrice.mul(nasReceipt.gasUsed)
     );
 
-    console.log(`gasUsed: ${gasUsed}, Cost: ${ethers.utils.formatEther(txCost)} ETH`)
+    console.log(`gasUsed: ${gasUsed}, Cost: ${ethers.utils.formatEther(txCost)} `)
     console.log(`FakeETH token address: ${fethContract.address}`);
-    console.log(`Stable token address: ${stblContract.address}`);
+    console.log(`NAS token address: ${nasContract.address}`);
 
 }
 
@@ -50,13 +50,13 @@ main().catch((error) => {
 
 async function getSigner() {
     const provider = new ethers.providers.AlchemyProvider(
-        "goerli",
-        getEnvVariableValue("ALCHEMY_API_KEY")
+        "maticmum",
+        process.env.ALCHEMY_API_KEY
     );
     const wallet = new ethers.Wallet(getEnvVariableValue("PRIVATE_KEY"));
     signer = wallet.connect(provider);
     const balance = await signer.getBalance();
-    console.log(`Signer address: ${wallet.address}\nBalance: ${ethers.utils.formatEther(balance)} ETH`);
+    console.log(`Signer address: ${wallet.address}\nBalance: ${ethers.utils.formatEther(balance)} MATIC`);
 }
 
 function getEnvVariableValue(varName: string): string {
