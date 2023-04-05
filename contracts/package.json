@@ -8,7 +8,8 @@
     "main": "ts-node --files ./scripts/Main.ts",
     "deploy:tokens": "ts-node --files ./scripts/deployTokens.ts",
     "mint": "ts-node --files ./scripts/mintTokens.ts",
-    "sushi": "ts-node --files ./scripts/deploySushiPool"
+    "sushi": "ts-node --files ./scripts/deploySushiPool.ts",
+    "deploy:arbitrage": "ts-node --files ./scripts/deployArbitrage.ts"
   },
   "keywords": [],
   "author": "",

@@ -8,7 +8,7 @@ import path from "path";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const FETH_TOKEN_ADDRESS = "0xB30b5258299397f355ff58B82eFbaC594Ea0A8cc";
-const FAUCET_AMOUNT = ethers.utils.parseEther("10");
+const FAUCET_AMOUNT = ethers.utils.parseEther("50");
 const NAS_TOKEN_ADDRESS = "0x27b4E260749DDB780ea2AA0C30608c51ee28F6C4";
 const STAKE_LOCK_TIME_SECONDS = 30 * 60; //30 minutes
 const SUSHI_ROUTER_ADDRESS = "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506";
