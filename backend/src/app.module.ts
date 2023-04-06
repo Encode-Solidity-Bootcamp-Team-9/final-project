@@ -31,7 +31,7 @@ import { join } from 'path';
     // expose static files (front-end)
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'front'),
-      exclude: ['/api*'],
+      exclude: ['/api*', '/arb-trigger*', '/info*'],
     }),
     DbModule,
   ],
