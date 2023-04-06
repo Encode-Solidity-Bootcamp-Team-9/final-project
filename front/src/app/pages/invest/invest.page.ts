@@ -166,7 +166,15 @@ export class InvestPage implements OnInit {
       await this.infoService.getUserInfo();
       await this.infoService.getPoolsInfo();
       await this.infoService.getArbitrageInfo();
+      this.notificationService.notify({
+        status: 'success',
+        message: `You have successfully swapped FETH for NAS !`,
+      });
     } catch (e) {
+      this.notificationService.notify({
+        status: 'error',
+        message: (e as Error).message,
+      });
     } finally {
       this.loadingSwap = false;
     }
