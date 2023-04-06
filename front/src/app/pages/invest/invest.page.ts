@@ -8,6 +8,7 @@ import { EChartsOption } from 'echarts';
 import { generatePieOptions } from '../home/utils';
 import { InfoService } from 'src/app/services/info.service';
 import { TokensService } from 'src/app/services/tokens.service';
+import { NotificationService } from 'src/app/services/notification.service';
 import { UserInfo } from 'src/app/models/user';
 import { Arbitrage } from 'src/app/models/arbitrage-tx';
 import { ToETHPipe } from 'src/app/pipes/to-eth.pipe';
@@ -86,7 +87,8 @@ export class InvestPage implements OnInit {
     private web3: Web3Service,
     public infoService: InfoService,
     private swapService: SwapService,
-    private tokensService: TokensService
+    private tokensService: TokensService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnDestroy() {
@@ -129,7 +131,7 @@ export class InvestPage implements OnInit {
         const arbitrageStaked = +Number(
           ethers.utils.formatEther(this.arbitrage.totalStaked)
         ).toFixed(2);
-        const stakeShare = (totalStaked/arbitrageStaked*100).toFixed(2);
+        const stakeShare = (activeStaked/arbitrageStaked*100).toFixed(2);
         
         this.totalProfits = generatePieOptions(
           [
@@ -180,11 +182,15 @@ export class InvestPage implements OnInit {
     this.loadingMint = true;
     try {
       await this.tokensService.mint();
-      /*this.notificationService.notify({
+      this.notificationService.notify({
       status: 'success',
-      message: `You have successfully minted 10 FETH !`,
-    });*/
+      message: `You have successfully minted 50 FETH !`,
+    });
     } catch (e) {
+      this.notificationService.notify({
+        status: 'error',
+        message: (e as Error).message,
+      });
     } finally {
       this.loadingMint = false;
     }
@@ -198,11 +204,15 @@ export class InvestPage implements OnInit {
       await this.tokensService.stake(
         ethers.utils.parseEther(amount.toString()).toString()
       );
-      /*this.notificationService.notify({
+      this.notificationService.notify({
       status: 'success',
       message: `You have successfully staked ${amount} NAS !`,
-    });*/
+    });
     } catch (e) {
+      this.notificationService.notify({
+        status: 'error',
+        message: (e as Error).message,
+      });
     } finally {
       this.loadingStake = false;
     }
@@ -215,11 +225,15 @@ export class InvestPage implements OnInit {
       await this.tokensService.withdrawStake(
         ethers.utils.parseEther(amount.toString()).toString()
       );
-      /*this.notificationService.notify({
+      this.notificationService.notify({
       status: 'success',
       message: `You have successfully withdrawn ${amount} NAS !`,
-    });*/
+    });
     } catch (e) {
+      this.notificationService.notify({
+        status: 'error',
+        message: (e as Error).message,
+      });
     } finally {
       this.loadingWithdraw = false;
     }
@@ -229,11 +243,15 @@ export class InvestPage implements OnInit {
     this.loadingProfits = true;
     try {
       await this.tokensService.claimProfits();
-      /*this.notificationService.notify({
+      this.notificationService.notify({
       status: 'success',
       message: `You have successfully claimed your profits !`,
-    });*/
+    });
     } catch (e) {
+      this.notificationService.notify({
+        status: 'error',
+        message: (e as Error).message,
+      });
     } finally {
       this.loadingProfits = false;
     }
