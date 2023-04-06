@@ -200,7 +200,7 @@
               </ion-card-header>
               <ion-card-content>
                 <div *ngIf="userInfo">
-                  Active stake: {{ userInfo.staked | toETH }} <em>NAS</em> | 
+                  Active stake: {{ userInfo.activeStaked | toETH }} <em>NAS</em> | 
                 </div>
                 <div *ngIf="userInfo">
                   Locked until: {{ userInfo.locktime | date: 'dd/MM/yyyy
