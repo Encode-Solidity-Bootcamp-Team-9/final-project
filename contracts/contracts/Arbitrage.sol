@@ -192,7 +192,7 @@ contract Arbitrage is Ownable {
         totalProfits += profits;
         for(uint256 i = 1; i < stakers.length; i++) {
             uint256 currentStake = stakeInfos[stakers[i]].amount - stakeInfos[stakers[i]].withdrawn;
-            stakeInfos[stakers[i]].profit += profits * (currentStake / totalStaked);
+            stakeInfos[stakers[i]].profit += (profits * ((currentStake * 100) / totalStaked)) / 100;
         }
     }
 
