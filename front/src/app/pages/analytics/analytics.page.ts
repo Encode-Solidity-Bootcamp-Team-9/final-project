@@ -146,8 +146,12 @@ export class AnalyticsPage implements OnInit {
       [TKN2_SYMBOL, TKN1_SYMBOL]
     );
 
-    const uniNAS = +Number(ethers.utils.formatEther(this.poolsState!.uniNAS)).toFixed(2);
-    const uniFETH = +Number(ethers.utils.formatEther(this.poolsState!.uniFETH)).toFixed(2);
+    const uniNAS = +Number(
+      ethers.utils.formatEther(this.poolsState!.uniNAS)
+    ).toFixed(2);
+    const uniFETH = +Number(
+      ethers.utils.formatEther(this.poolsState!.uniFETH)
+    ).toFixed(2);
     this.poolUniBalance = generatePieOptions(
       [
         { value: uniNAS, name: 'NAS' },
@@ -158,6 +162,11 @@ export class AnalyticsPage implements OnInit {
       ],
       [TKN2_SYMBOL, TKN1_SYMBOL]
     );
+  }
+
+  openTx(hash: string) {
+    const url = `https://mumbai.polygonscan.com/tx/${hash}`;
+    window.open(url, '_blank');
   }
 
   ngOnDestroy() {

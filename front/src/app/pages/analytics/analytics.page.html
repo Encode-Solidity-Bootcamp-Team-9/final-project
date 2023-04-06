@@ -67,7 +67,7 @@
         <div class="ion-padding" slot="content">
           <div class="history">
             <div class="history-item" *ngFor="let h of history">
-              <ion-card class="chart">
+              <ion-card class="chart" (click)="openTx(h.hash)">
                 <ion-card-header>
                   <ion-card-title>{{ h.hash }}</ion-card-title>
                 </ion-card-header>

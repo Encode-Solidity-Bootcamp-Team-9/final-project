@@ -1,8 +1,7 @@
-import {Module} from '@nestjs/common';
-import {PG_CONNECTION} from "../config";
-import {Pool} from 'pg';
-import {ConfigService} from "@nestjs/config";
-
+import { Module } from '@nestjs/common';
+import { PG_CONNECTION } from '../config';
+import { Pool } from 'pg';
+import { ConfigService } from '@nestjs/config';
 
 const dbProvider = {
   provide: PG_CONNECTION,
@@ -15,13 +14,11 @@ const dbProvider = {
       port: configService.get('PG_PORT'),
     });
   },
-  inject: [ConfigService]
+  inject: [ConfigService],
 };
 
 @Module({
   providers: [dbProvider, ConfigService],
   exports: [dbProvider],
 })
-export class DbModule {
-
-}
+export class DbModule {}
