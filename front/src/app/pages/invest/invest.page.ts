@@ -123,7 +123,7 @@ export class InvestPage implements OnInit {
         const totalStaked = +Number(
           ethers.utils.formatEther(this.userInfo.staked)
         ).toFixed(2);
-        const totalReturn = (totalProfits/totalStaked*100).toFixed(2);
+        const totalReturn = ((totalProfits / totalStaked) * 100).toFixed(2);
 
         const activeStaked = +Number(
           ethers.utils.formatEther(this.userInfo.activeStaked)
@@ -131,8 +131,8 @@ export class InvestPage implements OnInit {
         const arbitrageStaked = +Number(
           ethers.utils.formatEther(this.arbitrage.totalStaked)
         ).toFixed(2);
-        const stakeShare = (activeStaked/arbitrageStaked*100).toFixed(2);
-        
+        const stakeShare = ((activeStaked / arbitrageStaked) * 100).toFixed(2);
+
         this.totalProfits = generatePieOptions(
           [
             { value: totalProfits, name: `Your Profits: ${totalReturn}%` },
@@ -191,9 +191,9 @@ export class InvestPage implements OnInit {
     try {
       await this.tokensService.mint();
       this.notificationService.notify({
-      status: 'success',
-      message: `You have successfully minted 50 FETH !`,
-    });
+        status: 'success',
+        message: `You have successfully minted 50 FETH !`,
+      });
     } catch (e) {
       this.notificationService.notify({
         status: 'error',
@@ -213,9 +213,9 @@ export class InvestPage implements OnInit {
         ethers.utils.parseEther(amount.toString()).toString()
       );
       this.notificationService.notify({
-      status: 'success',
-      message: `You have successfully staked ${amount} NAS !`,
-    });
+        status: 'success',
+        message: `You have successfully staked ${amount} NAS !`,
+      });
     } catch (e) {
       this.notificationService.notify({
         status: 'error',
@@ -234,9 +234,9 @@ export class InvestPage implements OnInit {
         ethers.utils.parseEther(amount.toString()).toString()
       );
       this.notificationService.notify({
-      status: 'success',
-      message: `You have successfully withdrawn ${amount} NAS !`,
-    });
+        status: 'success',
+        message: `You have successfully withdrawn ${amount} NAS !`,
+      });
     } catch (e) {
       this.notificationService.notify({
         status: 'error',
@@ -247,14 +247,20 @@ export class InvestPage implements OnInit {
     }
   }
 
+  public async maxWithdraw() {
+    this.withdrawAmount = Number(
+      ethers.utils.formatEther(this.userInfo!.activeStaked)
+    );
+  }
+
   public async claimProfits() {
     this.loadingProfits = true;
     try {
       await this.tokensService.claimProfits();
       this.notificationService.notify({
-      status: 'success',
-      message: `You have successfully claimed your profits !`,
-    });
+        status: 'success',
+        message: `You have successfully claimed your profits !`,
+      });
     } catch (e) {
       this.notificationService.notify({
         status: 'error',
