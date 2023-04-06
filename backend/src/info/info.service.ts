@@ -27,6 +27,10 @@ export class InfoService {
       feth: (await this.contracts.loanToken.balanceOf(address)).toString(),
       nas: (await this.contracts.stakeToken.balanceOf(address)).toString(),
       locktime: new Date(stakeInfo.endTS * 1000),
+      withdrawn: stakeInfo.withdrawn.toString(),
+      claimed: stakeInfo.claimed.toString(),
+      activeStaked: (stakeInfo.amount - stakeInfo.withdrawn).toString(),
+      activeProfits: (stakeInfo.profit - stakeInfo.claimed).toString()
     };
   }
 

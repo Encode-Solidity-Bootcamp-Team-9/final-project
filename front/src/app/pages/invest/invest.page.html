@@ -47,8 +47,7 @@
         </ion-item>
         <div class="ion-padding" slot="content">
           <p>
-            If your wallet has never minted <em>FETH</em>. You can use this
-            faucet to mint up to <em>10.0 FETH</em>.
+            Use this faucet to get <em>10.0 free FETH</em>. You can only claim this faucet <em>once</em>.
           </p>
           <div class="buttons">
             <ion-button
@@ -80,9 +79,15 @@
           <div class="swap-container">
             <div class="inputs">
               <ion-label class="balance"
-                >Balance
+                >FETH Balance
                 <em *ngIf="userInfo">
                   {{ userInfo.feth | toETH }}</em
+                ></ion-label
+              >
+              <ion-label class="balance"
+                >NAS Balance
+                <em *ngIf="userInfo">
+                  {{ userInfo.nas | toETH }}</em
                 ></ion-label
               >
               <ion-input
@@ -120,13 +125,13 @@
             <ion-card>
               <ion-card-header>
                 <ion-card-title
-                  ><em>NAS</em> Your Staked Balance</ion-card-title
+                  >Your Stake</ion-card-title
                 >
               </ion-card-header>
               <ion-card-content>
-                <div *ngIf="userInfo">
-                  <div>Balance: {{ userInfo.nas | toETH }} <em>NAS</em></div>
-                </div>
+                  <div *ngIf="userInfo">
+                    Active: {{ userInfo.activeStaked |toETH }} | Lifetime: {{ userInfo.staked |toETH }} <em>NAS</em>
+                  </div>
                 <div class="inputs">
                   <ion-input
                     label="NAS"
@@ -134,31 +139,34 @@
                     [(ngModel)]="stakeAmount"
                   ></ion-input>
                 </div>
-                <ion-button (click)="stake()" [disabled]="!userInfo"
-                  >Stake</ion-button
-                >
+                <ion-button (click)="stake()" [disabled]="!userInfo">
+                  <ion-label *ngIf="!loadingStake">Stake</ion-label>
+                  <ion-spinner *ngIf="loadingStake" name="crescent"></ion-spinner>
+                </ion-button>
               </ion-card-content>
             </ion-card>
 
             <ion-card>
               <ion-card-header>
-                <ion-card-title><em>NAS</em> Your Profits</ion-card-title>
+                <ion-card-title>Your Profits</ion-card-title>
               </ion-card-header>
               <ion-card-content>
                 <div *ngIf="userInfo">
-                  {{ userInfo.totalProfits | toETH }} <em>NAS</em>
+                  <div>Active: {{ userInfo.activeProfits | toETH }} <em>NAS</em></div>
+                  <div>Lifetime: {{ userInfo.totalProfits | toETH }} <em>NAS</em></div>
                 </div>
                 <div></div>
-                <ion-button (click)="claimProfits()" [disabled]="!userInfo"
-                  >Claim your profits</ion-button
-                >
+                <ion-button (click)="claimProfits()" [disabled]="!userInfo">
+                  <ion-label *ngIf="!loadingProfits">Claim your profits</ion-label>
+                  <ion-spinner *ngIf="loadingProfits" name="crescent"></ion-spinner>
+                </ion-button>
               </ion-card-content>
             </ion-card>
           </div>
           <div class="charts">
             <ion-card class="chart">
               <ion-card-header>
-                <ion-card-title>Your Stake vs Total Stake</ion-card-title>
+                <ion-card-title>Your Share of Current Stake</ion-card-title>
               </ion-card-header>
               <ion-card-content>
                 <div
@@ -172,8 +180,7 @@
             <ion-card class="chart">
               <ion-card-header>
                 <ion-card-title
-                  >Your Historical Stake vs Your Share of
-                  Profits</ion-card-title
+                  >Your Lifetime Profits</ion-card-title
                 >
               </ion-card-header>
               <ion-card-content>
@@ -188,13 +195,12 @@
           <div>
             <ion-card>
               <ion-card-header>
-                <ion-card-title
-                  ><em>NAS</em> Withdraw Your Stake</ion-card-title
+                <ion-card-title>Withdraw Your Stake</ion-card-title
                 >
               </ion-card-header>
               <ion-card-content>
                 <div *ngIf="userInfo">
-                  {{ userInfo.staked | toETH }} <em>NAS</em>
+                  Active stake: {{ userInfo.staked | toETH }} <em>NAS</em> | 
                 </div>
                 <div *ngIf="userInfo">
                   Locked until: {{ userInfo.locktime | date: 'dd/MM/yyyy
@@ -207,9 +213,10 @@
                     [(ngModel)]="withdrawAmount"
                   ></ion-input>
                 </div>
-                <ion-button (click)="withdrawStake()" [disabled]="!userInfo"
-                  >Withdraw</ion-button
-                >
+                <ion-button (click)="withdrawStake()" [disabled]="!userInfo">
+                  <ion-label *ngIf="!loadingWithdraw">Withdraw</ion-label>
+                  <ion-spinner *ngIf="loadingWithdraw" name="crescent"></ion-spinner>
+                </ion-button>
               </ion-card-content>
             </ion-card>
           </div>

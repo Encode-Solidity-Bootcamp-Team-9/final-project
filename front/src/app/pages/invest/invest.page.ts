@@ -78,6 +78,8 @@ export class InvestPage implements OnInit {
   public loadingSwap: boolean = false;
   public loadingMint: boolean = false;
   public loadingStake: boolean = false;
+  public loadingWithdraw: boolean = false;
+  public loadingProfits: boolean = false;
   public alreadyMinted: boolean = false;
 
   constructor(
@@ -116,6 +118,9 @@ export class InvestPage implements OnInit {
         const totalProfits = Number(
           ethers.utils.formatEther(this.userInfo.totalProfits)
         );
+        const activeStaked = Number(
+          ethers.utils.formatEther(this.userInfo.activeStaked)
+        );
         const totalStaked = Number(
           ethers.utils.formatEther(this.userInfo.staked)
         );
@@ -124,10 +129,10 @@ export class InvestPage implements OnInit {
         );
         this.totalProfits = generatePieOptions(
           [
-            { value: totalProfits, name: 'Total Profits' }, //userInfo.totalProfits converted to ETH
+            { value: totalProfits, name: 'Your Profits' },
             {
               value: totalStaked,
-              name: 'TVL Invested', //userInfo.staked converted to ETH
+              name: 'Your Stake',
             },
           ],
           [TKN2_SYMBOL, TKN2_SYMBOL]
@@ -135,10 +140,10 @@ export class InvestPage implements OnInit {
 
         this.currentPosition = generatePieOptions(
           [
-            { value: totalStaked, name: 'Your Stake' }, //userInfo.staked converted to ETH
+            { value: activeStaked, name: `Your Stake: ${totalStaked/arbitrageStaked*100}%` },
             {
-              value: arbitrageStaked,
-              name: 'Total NAS Staked', //arbitrage.totalStaked converted to ETH
+              value: arbitrageStaked - activeStaked,
+              name: 'Total Stake',
             },
           ],
           [TKN2_SYMBOL, TKN2_SYMBOL]
@@ -200,7 +205,7 @@ export class InvestPage implements OnInit {
   }
 
   public async withdrawStake() {
-    this.loadingStake = true;
+    this.loadingWithdraw = true;
     try {
       const amount = this.withdrawAmount;
       await this.tokensService.withdrawStake(
@@ -212,12 +217,12 @@ export class InvestPage implements OnInit {
     });*/
     } catch (e) {
     } finally {
-      this.loadingStake = false;
+      this.loadingWithdraw = false;
     }
   }
 
   public async claimProfits() {
-    this.loadingStake = true;
+    this.loadingProfits = true;
     try {
       await this.tokensService.claimProfits();
       /*this.notificationService.notify({
@@ -226,7 +231,7 @@ export class InvestPage implements OnInit {
     });*/
     } catch (e) {
     } finally {
-      this.loadingStake = false;
+      this.loadingProfits = false;
     }
   }
 }
