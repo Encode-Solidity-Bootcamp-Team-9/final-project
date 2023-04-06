@@ -108,7 +108,7 @@ contract Arbitrage is Ownable {
 
         totalStaked += amount;
         
-        addressInStake[msg.sender] == stakers.length;
+        addressInStake[msg.sender] = stakers.length;
         stakers.push(msg.sender);
 
         stakeInfos[msg.sender] = StakeInfo({
