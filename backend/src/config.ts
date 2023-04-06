@@ -32,7 +32,7 @@ export const ARBITRAGE_CONTRACT_ADDRESS =
 // ARBITRAGE TOKENS
 export const TOKEN_STAKING = new Token(
   CHAIN_ID,
-  process.env.NAS_TOKEN_ADDRESS || '0x9622F58d9745bAfaeABB7712a69DcdBdcF72e188',
+  process.env.NAS_TOKEN_ADDRESS || '0x27b4E260749DDB780ea2AA0C30608c51ee28F6C4',
   18,
   'NAS',
   'Not A Scam',
@@ -40,7 +40,7 @@ export const TOKEN_STAKING = new Token(
 export const TOKEN_LOAN = new Token(
   CHAIN_ID,
   process.env.FETH_TOKEN_ADDRESS ||
-    '0xC97727ba966F6C52580121862dF2771A1Ca0F28a',
+    '0xB30b5258299397f355ff58B82eFbaC594Ea0A8cc',
   18,
   'FETH',
   'Fake ETH',
