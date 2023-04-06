@@ -8,7 +8,8 @@ export interface ArbitrageTx {
 }
 
 export interface Arbitrage {
-  address: string; //arbitrage contract address
+  address: string;  //arbitrage contract address
   totalStaked: string;
   totalProfits: string; // historical total profits
+  totalReturn: string; //lifetime return on investment
 }

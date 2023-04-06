@@ -21,7 +21,7 @@
             <ion-card class="chart">
               <ion-card-header>
                 <ion-card-title
-                  >Current TVL vs Total Profits Generated</ion-card-title
+                  >Lifetime Investment and Profits</ion-card-title
                 >
               </ion-card-header>
               <ion-card-content>
@@ -35,9 +35,13 @@
             <div class="stats">
               <ion-card>
                 <ion-card-header>
-                  <ion-card-title>APR</ion-card-title>
+                  <ion-card-title>Lifetime Return on Investment</ion-card-title>
                 </ion-card-header>
-                <ion-card-content>15.3%</ion-card-content>
+                <ion-card-content>
+                  <div *ngIf="arbitrage">
+                    {{ arbitrage.totalReturn }} %
+                  </div>
+                </ion-card-content>
               </ion-card>
               <ion-card>
                 <ion-card-header>

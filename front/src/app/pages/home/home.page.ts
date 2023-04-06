@@ -68,17 +68,17 @@ export class HomePage implements OnInit {
   private updateChart() {
     if (!this.arbitrage) return;
     const totalProfits = Number(
-      ethers.utils.formatEther(this.arbitrage!.totalProfits)
+      parseFloat(ethers.utils.formatEther(this.arbitrage!.totalProfits)).toFixed(2)
     );
     const totalStaked = Number(
       ethers.utils.formatEther(this.arbitrage!.totalStaked)
     );
     this.chartOptions = generatePieOptions(
       [
-        { value: totalProfits, name: 'Profits Generated' },
+        { value: totalProfits, name: `Total profits` },
         {
           value: totalStaked,
-          name: 'TVL Invested',
+          name: 'Total investment',
         },
       ],
       [TKN2_SYMBOL, TKN2_SYMBOL]

@@ -38,7 +38,13 @@ export class InfoService {
     return {
       address: this.contracts.arbitrageContract.address,
       totalStaked: (await this.contracts.arbitrageContract.totalStaked()).toString(),
-      totalProfits: (await this.contracts.arbitrageContract.totalProfits()).toString()
+      totalProfits: (await this.contracts.arbitrageContract.totalProfits()).toString(),
+      totalReturn: ((
+        await this.contracts.arbitrageContract.totalProfits() /
+        await this.contracts.arbitrageContract.totalStaked() *
+        100
+        ).toFixed(2).toString()
+      )
     };
   }
 
