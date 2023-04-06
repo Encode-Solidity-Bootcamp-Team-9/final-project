@@ -115,20 +115,20 @@ export class InvestPage implements OnInit {
     this.subs.push(
       this.infoService.refresh.subscribe(() => {
         if (!this.userInfo || !this.arbitrage) return;
-        const totalProfits = Number(
+        const totalProfits = +Number(
           ethers.utils.formatEther(this.userInfo.totalProfits)
-        );
-        const totalStaked = Number(
+        ).toFixed(2);
+        const totalStaked = +Number(
           ethers.utils.formatEther(this.userInfo.staked)
-        );
+        ).toFixed(2);
         const totalReturn = (totalProfits/totalStaked*100).toFixed(2);
 
-        const activeStaked = Number(
+        const activeStaked = +Number(
           ethers.utils.formatEther(this.userInfo.activeStaked)
-        );
-        const arbitrageStaked = Number(
+        ).toFixed(2);
+        const arbitrageStaked = +Number(
           ethers.utils.formatEther(this.arbitrage.totalStaked)
-        );
+        ).toFixed(2);
         const stakeShare = (totalStaked/arbitrageStaked*100).toFixed(2);
         
         this.totalProfits = generatePieOptions(

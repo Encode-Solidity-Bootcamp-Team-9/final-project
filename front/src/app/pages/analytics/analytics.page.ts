@@ -109,12 +109,12 @@ export class AnalyticsPage implements OnInit {
 
   private updateArbitrage() {
     if (!this.arbitrage) return;
-    const totalProfits = Number(
+    const totalProfits = +Number(
       ethers.utils.formatEther(this.arbitrage!.totalProfits)
-    );
-    const totalStaked = Number(
+    ).toFixed(2);
+    const totalStaked = +Number(
       ethers.utils.formatEther(this.arbitrage!.totalStaked)
-    );
+    ).toFixed(2);
     this.totalProfits = generatePieOptions(
       [
         { value: totalProfits, name: 'Profits Generated' },
@@ -129,12 +129,12 @@ export class AnalyticsPage implements OnInit {
 
   private updatePools() {
     if (!this.poolsState) return;
-    const sushiNAS = Number(
+    const sushiNAS = +Number(
       ethers.utils.formatEther(this.poolsState!.sushiNAS)
-    );
-    const sushiFETH = Number(
+    ).toFixed(2);
+    const sushiFETH = +Number(
       ethers.utils.formatEther(this.poolsState!.sushiFETH)
-    );
+    ).toFixed(2);
     this.poolSushiBalance = generatePieOptions(
       [
         { value: sushiNAS, name: 'NAS' },
@@ -146,8 +146,8 @@ export class AnalyticsPage implements OnInit {
       [TKN2_SYMBOL, TKN1_SYMBOL]
     );
 
-    const uniNAS = Number(ethers.utils.formatEther(this.poolsState!.uniNAS));
-    const uniFETH = Number(ethers.utils.formatEther(this.poolsState!.uniFETH));
+    const uniNAS = +Number(ethers.utils.formatEther(this.poolsState!.uniNAS)).toFixed(2);
+    const uniFETH = +Number(ethers.utils.formatEther(this.poolsState!.uniFETH)).toFixed(2);
     this.poolUniBalance = generatePieOptions(
       [
         { value: uniNAS, name: 'NAS' },

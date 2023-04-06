@@ -67,12 +67,11 @@ export class HomePage implements OnInit {
 
   private updateChart() {
     if (!this.arbitrage) return;
-    const totalProfits = Number(
-      parseFloat(ethers.utils.formatEther(this.arbitrage!.totalProfits)).toFixed(2)
-    );
-    const totalStaked = Number(
+    const totalProfits = +Number(
+      ethers.utils.formatEther(this.arbitrage!.totalProfits)).toFixed(2);
+    const totalStaked = +Number(
       ethers.utils.formatEther(this.arbitrage!.totalStaked)
-    );
+    ).toFixed(2);
     this.chartOptions = generatePieOptions(
       [
         { value: totalProfits, name: `Total profits` },
