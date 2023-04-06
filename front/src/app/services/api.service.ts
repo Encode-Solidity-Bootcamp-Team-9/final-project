@@ -6,12 +6,12 @@ import { lastValueFrom } from 'rxjs';
   providedIn: 'root',
 })
 export class ApiService {
-  private BASE_URL = 'http://localhost:3000';
+  private BASE_URL = 'http://localhost:3000/api';
   constructor(private http: HttpClient) {
     if (isDevMode()) {
-      this.BASE_URL = 'http://localhost:3000';
+      this.BASE_URL = 'http://localhost:3000/api';
     } else {
-      this.BASE_URL = 'https://team9-arbitrage.herokuapp.com';
+      this.BASE_URL = 'https://team9-arbitrage.herokuapp.com/api';
     }
   }
 

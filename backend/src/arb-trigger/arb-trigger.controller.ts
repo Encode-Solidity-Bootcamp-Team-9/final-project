@@ -2,7 +2,7 @@ import { Controller, Get, Post } from '@nestjs/common';
 import { ArbTriggerService } from './arb-trigger.service';
 import { Dex } from '../config';
 
-@Controller('arb-trigger')
+@Controller('api/arb-trigger')
 export class ArbTriggerController {
   constructor(private readonly arbTriggerService: ArbTriggerService) {}
 
