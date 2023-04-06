@@ -191,9 +191,8 @@ contract Arbitrage is Ownable {
         uint256 profits = post - pre;
         totalProfits += profits;
         for(uint256 i = 1; i < stakers.length; i++) {
-            StakeInfo storage data = stakeInfos[stakers[i]];
-            uint256 currentStake = data.amount - data.withdrawn;
-            data.profit += profits * (currentStake / totalStaked);
+            uint256 currentStake = stakeInfos[stakers[i]].amount - stakeInfos[stakers[i]].withdrawn;
+            stakeInfos[stakers[i]].profit += profits * (currentStake / totalStaked);
         }
     }
 
