@@ -11,7 +11,7 @@ export class ApiService {
     if (isDevMode()) {
       this.BASE_URL = 'http://localhost:3000';
     } else {
-      this.BASE_URL = 'https://team9-voting.herokuapp.com';
+      this.BASE_URL = 'https://team9-arbitrage.herokuapp.com';
     }
   }
 
