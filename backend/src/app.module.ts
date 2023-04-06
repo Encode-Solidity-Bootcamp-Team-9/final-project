@@ -30,12 +30,12 @@ import { join } from 'path';
     }),
     // expose static files (front-end)
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'front'),
+      rootPath: join(__dirname, '..', 'www'),
       exclude: ['/api*', '/arb-trigger*', '/info*'],
     }),
     DbModule,
   ],
-  controllers: [AppController, ArbTriggerController, InfoController],
+  controllers: [ArbTriggerController, InfoController], //AppController,
   providers: [
     AppService,
     InfoService,
