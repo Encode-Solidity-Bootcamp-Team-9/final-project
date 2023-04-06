@@ -118,18 +118,22 @@ export class InvestPage implements OnInit {
         const totalProfits = Number(
           ethers.utils.formatEther(this.userInfo.totalProfits)
         );
-        const activeStaked = Number(
-          ethers.utils.formatEther(this.userInfo.activeStaked)
-        );
         const totalStaked = Number(
           ethers.utils.formatEther(this.userInfo.staked)
+        );
+        const totalReturn = (totalProfits/totalStaked*100).toFixed(2);
+
+        const activeStaked = Number(
+          ethers.utils.formatEther(this.userInfo.activeStaked)
         );
         const arbitrageStaked = Number(
           ethers.utils.formatEther(this.arbitrage.totalStaked)
         );
+        const stakeShare = (totalStaked/arbitrageStaked*100).toFixed(2);
+        
         this.totalProfits = generatePieOptions(
           [
-            { value: totalProfits, name: 'Your Profits' },
+            { value: totalProfits, name: `Your Profits: ${totalReturn}%` },
             {
               value: totalStaked,
               name: 'Your Stake',
@@ -140,7 +144,7 @@ export class InvestPage implements OnInit {
 
         this.currentPosition = generatePieOptions(
           [
-            { value: activeStaked, name: `Your Stake: ${totalStaked/arbitrageStaked*100}%` },
+            { value: activeStaked, name: `Your Stake: ${stakeShare}%` },
             {
               value: arbitrageStaked - activeStaked,
               name: 'Total Stake',
