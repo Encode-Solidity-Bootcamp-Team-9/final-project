@@ -114,12 +114,11 @@ contract Arbitrage is Ownable {
         stakeInfos[msg.sender] = StakeInfo({
             startTS: block.timestamp,
             endTS: block.timestamp + stakeLockTime,
-            amount: amount,
-            profit: 0,
-            claimed: 0,
-            withdrawn: 0
+            amount: amount + stakeInfos[msg.sender].amount,
+            profit: stakeInfos[msg.sender].profit,
+            claimed: stakeInfos[msg.sender].claimed,
+            withdrawn: stakeInfos[msg.sender].withdrawn
         });
-
         
         emit Staked(msg.sender, amount);
     }
